@@ -1,0 +1,259 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
+@import "tailwindcss";
+
+:root {
+  --font-sans: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+  
+  /* HSL Coordinates mapped from React state variables for 8Bees Brand Palette */
+  --primary-h: 69;
+  --primary-s: 82%;
+  --primary-l: 41%;
+  
+  --secondary-h: 192;
+  --secondary-s: 24%;
+  --secondary-l: 50%;
+  
+  --bg-h: 0;
+  --bg-s: 0%;
+  --bg-l: 16%;
+  
+  --border-radius: 12px;
+
+  /* Dynamic CSS variable mappings (Dark Mode Defaults) */
+  --bg-primary: hsl(var(--bg-h), var(--bg-s), var(--bg-l)); /* #292929 */
+  --bg-secondary: hsl(var(--bg-h), var(--bg-s), calc(var(--bg-l) + 4%)); /* #333333 */
+  --bg-tertiary: hsl(var(--secondary-h), var(--secondary-s), calc(var(--secondary-l) - 20%)); 
+  --bg-tertiary-light: hsl(var(--secondary-h), var(--secondary-s), calc(var(--secondary-l) - 10%));
+  --text-primary: #FFFFFF;
+  --text-secondary: #B0B0B0;
+  
+  /* Shadow colors for Neumorphism & Claymorphism */
+  --shadow-dark: rgba(0, 0, 0, 0.5);
+  --shadow-light: rgba(255, 255, 255, 0.05);
+  
+  /* Glassmorphism settings */
+  --card-bg-rgb: 41, 41, 41;
+  
+  /* Background grid and mesh alphas */
+  --mesh-navy-opacity: 0.15;
+  --mesh-gold-opacity-top: 0.06;
+  --mesh-gold-opacity-bottom: 0.04;
+  --grid-color: rgba(255, 255, 255, 0.015);
+  
+  /* Dynamic Opacities for Floating Orbs */
+  --orb-gold-opacity: 0.04;
+  --orb-navy-opacity: 0.12;
+  
+  /* Dynamic Title Gradient Start */
+  --gold-grad-start: #FFFFFF;
+  
+  /* Custom Vector Page Backgrounds */
+  --eye-bg: #202020;
+  --stego-bg: #202020;
+  --net-bg: #202020;
+  --giin-bg: #202020;
+}
+
+:root.light {
+  /* Dynamic HSL Mappings for Light Mode (Background and primary is white) */
+  --bg-primary: #FFFFFF; /* Pure White background */
+  --bg-secondary: #F0F0F0; /* Off-White card background */
+  --bg-tertiary: #E0E0E0; /* Borders and dividers */
+  --bg-tertiary-light: #D0D0D0;
+  --text-primary: #292929; /* Dark Charcoal text for maximum readability */
+  --text-secondary: #555555;
+  
+  /* Shadow intensities */
+  --shadow-gold-alpha: 0.04;
+  --shadow-gold-alpha-hover: 0.10;
+  --shadow-navy-alpha: 0.05;
+  
+  /* Neumorphic shadow colors in light mode */
+  --shadow-dark: rgba(41, 41, 41, 0.08);
+  --shadow-light: rgba(255, 255, 255, 0.95);
+  
+  /* Glassmorphism settings */
+  --card-bg-rgb: 255, 255, 255;
+  
+  /* Background grid and mesh alphas */
+  --mesh-navy-opacity: 0.02;
+  --mesh-gold-opacity-top: 0.02;
+  --mesh-gold-opacity-bottom: 0.01;
+  --grid-color: rgba(41, 41, 41, 0.02);
+  
+  /* Dynamic Opacities for Floating Orbs */
+  --orb-gold-opacity: 0.02;
+  --orb-navy-opacity: 0.03;
+  
+  /* Dynamic Title Gradient Start */
+  --gold-grad-start: #292929;
+  
+  /* Custom Vector Page Backgrounds */
+  --eye-bg: #FFFFFF;
+  --stego-bg: #FFFFFF;
+  --net-bg: #FFFFFF;
+  --giin-bg: #FFFFFF;
+}
+
+@theme {
+  --font-sans: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+  
+  /* Dynamic Color Palette - mapped directly to HSL settings variables */
+  --color-gold-accent: hsl(var(--primary-h), var(--primary-s), var(--primary-l));
+  --color-gold-hover: hsl(var(--primary-h), var(--primary-s), calc(var(--primary-l) - 8%));
+  --color-gold-light: hsl(var(--primary-h), var(--primary-s), calc(var(--primary-l) + 15%));
+  
+  /* Dynamic CSS variable mappings */
+  --color-dark-navy: var(--bg-tertiary);
+  --color-dark-navy-light: var(--bg-tertiary-light);
+  --color-obsidian: var(--bg-secondary);
+  --color-deep-obsidian: var(--bg-primary);
+  --color-silver-text: var(--text-primary);
+  --color-muted-gray: var(--text-secondary);
+  
+  /* Dynamic radii mappings */
+  --radius-xl: var(--border-radius);
+  --radius-2xl: calc(var(--border-radius) * 1.5);
+  --radius-3xl: calc(var(--border-radius) * 2);
+  
+  /* Custom shadows */
+  --shadow-gold-glow: 0 0 20px rgba(165, 191, 19, var(--shadow-gold-alpha));
+  --shadow-gold-glow-hover: 0 0 30px rgba(165, 191, 19, var(--shadow-gold-alpha-hover));
+  --shadow-navy-glow: 0 0 25px rgba(98, 146, 158, var(--shadow-navy-alpha));
+}
+
+@layer base {
+  :root {
+    --font-sans: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+  }
+}
+
+/* Custom base styles */
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  overflow-x: hidden;
+  transition: background-color 0.4s ease, color 0.4s ease;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-primary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--bg-tertiary);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #FCA311;
+}
+
+/* Custom utilities */
+.bg-mesh-glow {
+  background-image: 
+    radial-gradient(at 0% 0%, rgba(252, 163, 17, var(--mesh-gold-opacity-top)) 0px, transparent 50%),
+    radial-gradient(at 100% 0%, rgba(20, 33, 61, var(--mesh-navy-opacity)) 0px, transparent 50%),
+    radial-gradient(at 50% 100%, rgba(252, 163, 17, var(--mesh-gold-opacity-bottom)) 0px, transparent 50%);
+}
+
+.bg-grid-texture {
+  background-image: 
+    linear-gradient(var(--grid-color) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+}
+
+/* Global transitions for interactive items under theme-switches */
+.bg-gradient-to-br, .bg-gradient-to-b, .bg-gradient-to-r, .bg-obsidian, .bg-dark-navy, .border, .text-white, .text-muted-gray, .text-silver-text, aside, header, nav, main, section, button, input, textarea {
+  transition: background-color 0.4s ease, border-color 0.4s ease, color 0.4s ease, box-shadow 0.4s ease;
+}
+
+.text-glow {
+  text-shadow: 0 0 10px var(--color-gold-accent);
+}
+
+.text-gradient-gold {
+  background: linear-gradient(135deg, var(--gold-grad-start) 30%, var(--color-gold-accent) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.text-gradient-gold-full {
+  background: linear-gradient(135deg, var(--color-gold-accent) 0%, var(--color-gold-light) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Dynamic Visual Styling Mode Card Classes */
+.card-style {
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  border-radius: var(--border-radius);
+}
+
+.card-style.flat {
+  background: var(--bg-secondary);
+  border: 1px solid var(--bg-tertiary);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.08);
+  backdrop-filter: none;
+}
+
+.card-style.neumorphic {
+  background: var(--bg-primary);
+  border: 1px solid transparent;
+  box-shadow: 8px 8px 16px var(--shadow-dark), -8px -8px 16px var(--shadow-light);
+  backdrop-filter: none;
+}
+
+.card-style.neumorphic-inset {
+  background: var(--bg-primary);
+  border: 1px solid transparent;
+  box-shadow: inset 8px 8px 16px var(--shadow-dark), inset -8px -8px 16px var(--shadow-light);
+  backdrop-filter: none;
+}
+
+.card-style.glassmorphic {
+  background: rgba(var(--card-bg-rgb), 0.45);
+  backdrop-filter: blur(12px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
+}
+
+:root.light .card-style.glassmorphic {
+  background: rgba(255, 255, 255, 0.45);
+  border: 1px solid rgba(20, 33, 61, 0.06);
+  box-shadow: 0 8px 32px 0 rgba(20, 33, 61, 0.05);
+}
+
+.card-style.claymorphic {
+  background: var(--bg-secondary);
+  border: 1px solid transparent;
+  box-shadow: 10px 10px 20px var(--shadow-dark), 
+              inset -8px -8px 12px rgba(0, 0, 0, 0.12), 
+              inset 8px 8px 12px rgba(255, 255, 255, 0.25);
+  backdrop-filter: none;
+}
+
+:root.light .card-style.claymorphic {
+  box-shadow: 10px 10px 20px rgba(163, 177, 198, 0.4), 
+              inset -8px -8px 12px rgba(0, 0, 0, 0.08), 
+              inset 8px 8px 12px rgba(255, 255, 255, 0.6);
+}
+
+@keyframes shimmer {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
