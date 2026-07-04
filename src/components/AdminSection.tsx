@@ -1403,6 +1403,105 @@ export default function AdminSection() {
                     </div>
                   </div>
 
+                  {/* Supabase Postgres Schema Guidelines */}
+                  <div className="p-5 bg-obsidian/40 border border-dark-navy/25 rounded-2xl text-left space-y-4">
+                    <span className="text-silver-text font-bold text-sm uppercase block border-b border-dark-navy/35 pb-2">
+                      Supabase Postgres Database Schema Setup
+                    </span>
+                    <p className="text-muted-gray text-xs leading-relaxed font-light">
+                      Copy and execute the following SQL DDL query inside your Supabase **SQL Editor** to create and initialize the database tables needed to store your dynamic portfolio configurations:
+                    </p>
+                    <div className="bg-obsidian border border-dark-navy/40 rounded-xl p-4 overflow-x-auto">
+                      <pre className="text-[10px] text-emerald-400 font-mono select-all whitespace-pre">
+{`-- 1. Profiles Table
+CREATE TABLE IF NOT EXISTS profiles (
+  id TEXT PRIMARY KEY,
+  name TEXT,
+  initials TEXT,
+  role TEXT,
+  company TEXT,
+  email TEXT,
+  location TEXT,
+  cvPath TEXT,
+  linkedinUrl TEXT,
+  githubUrl TEXT,
+  profileImage TEXT,
+  logoImage TEXT
+);
+
+-- 2. Services Table
+CREATE TABLE IF NOT EXISTS services (
+  id TEXT PRIMARY KEY,
+  title TEXT,
+  description TEXT,
+  iconName TEXT,
+  badge TEXT
+);
+
+-- 3. Projects Table
+CREATE TABLE IF NOT EXISTS projects (
+  id TEXT PRIMARY KEY,
+  title TEXT,
+  subtitle TEXT,
+  category TEXT,
+  tech TEXT[],
+  iconName TEXT,
+  mockup TEXT,
+  link TEXT
+);
+
+-- 4. Certifications Table
+CREATE TABLE IF NOT EXISTS certifications (
+  id TEXT PRIMARY KEY,
+  title TEXT,
+  issuer TEXT,
+  details TEXT,
+  date TEXT,
+  authority TEXT
+);
+
+-- 5. Metrics Table
+CREATE TABLE IF NOT EXISTS metrics (
+  id TEXT PRIMARY KEY,
+  value TEXT,
+  label TEXT,
+  subtitle TEXT
+);
+
+-- 6. Hero Copy Table
+CREATE TABLE IF NOT EXISTS hero_copy (
+  persona TEXT PRIMARY KEY,
+  eyebrow TEXT,
+  title TEXT,
+  description TEXT,
+  badges TEXT,
+  card1Title TEXT,
+  card1Subtitle TEXT,
+  card2Title TEXT,
+  card2Subtitle TEXT
+);
+
+-- 7. Branding Settings Table
+CREATE TABLE IF NOT EXISTS branding_settings (
+  id TEXT PRIMARY KEY,
+  theme TEXT,
+  visualMode TEXT,
+  borderRadius INTEGER,
+  primaryH INTEGER,
+  primaryS TEXT,
+  primaryL TEXT,
+  secondaryH INTEGER,
+  secondaryS TEXT,
+  secondaryL TEXT,
+  bgH INTEGER,
+  bgS TEXT,
+  bgL TEXT,
+  personaTone TEXT
+);`}
+                      </pre>
+                    </div>
+                  </div>
+
                 </div>
               )}
             </div>

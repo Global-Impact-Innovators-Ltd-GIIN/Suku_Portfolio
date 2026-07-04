@@ -1,5 +1,6 @@
 /* eslint-disable react-refresh/only-export-components */
 import React, { createContext, useContext, useState, useEffect } from 'react'
+import { supabase } from '../supabaseClient'
 
 export type VisualMode = 'flat' | 'neumorphic' | 'glassmorphic' | 'claymorphic'
 export type PersonaTone = 'executive' | 'technologist' | 'academic'
@@ -527,60 +528,287 @@ export const BrandingProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
   }, [theme])
 
-  // Save states to local storage
+  // Load data from Supabase on mount
+  useEffect(() => {
+    const loadSupabaseData = async () => {
+      try {
+        // 1. Fetch Profile
+        const { data: profileData, error: profileErr } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', 'suku-operator')
+          .maybeSingle()
+        if (profileData && !profileErr) {
+          setProfile(profileData)
+        }
+
+        // 2. Fetch Services
+        const { data: servicesData, error: servicesErr } = await supabase
+          .from('services')
+          .select('*')
+        if (servicesData && !servicesErr && servicesData.length > 0) {
+          setServices(servicesData)
+        }
+
+        // 3. Fetch Projects
+        const { data: projectsData, error: projectsErr } = await supabase
+          .from('projects')
+          .select('*')
+        if (projectsData && !projectsErr && projectsData.length > 0) {
+          setProjects(projectsData)
+        }
+
+        // 4. Fetch Certifications
+        const { data: certsData, error: certsErr } = await supabase
+          .from('certifications')
+          .select('*')
+        if (certsData && !certsErr && certsData.length > 0) {
+          setCertifications(certsData)
+        }
+
+        // 5. Fetch Metrics
+        const { data: metricsData, error: metricsErr } = await supabase
+          .from('metrics')
+          .select('*')
+        if (metricsData && !metricsErr && metricsData.length > 0) {
+          setMetrics(metricsData)
+        }
+
+        // 6. Fetch Hero Copy
+        const { data: copyData, error: copyErr } = await supabase
+          .from('hero_copy')
+          .select('*')
+        if (copyData && !copyErr && copyData.length > 0) {
+          const map: PersonaCopyMap = { ...DEFAULT_HERO_COPY }
+          copyData.forEach((row: any) => {
+            const tone = row.persona as PersonaTone
+            if (map[tone]) {
+              map[tone] = {
+                eyebrow: row.eyebrow,
+                title: row.title,
+                description: row.description,
+                badges: row.badges,
+                card1Title: row.card1Title,
+                card1Subtitle: row.card1Subtitle,
+                card2Title: row.card2Title,
+                card2Subtitle: row.card2Subtitle
+              }
+            }
+          })
+          setHeroCopy(map)
+        }
+
+        // 7. Fetch Branding Settings
+        const { data: settingsData, error: settingsErr } = await supabase
+          .from('branding_settings')
+          .select('*')
+          .eq('id', 'suku-settings')
+          .maybeSingle()
+        if (settingsData && !settingsErr) {
+          if (settingsData.theme) setThemeState(settingsData.theme)
+          if (settingsData.visualMode) setVisualMode(settingsData.visualMode)
+          if (settingsData.borderRadius) setBorderRadius(settingsData.borderRadius)
+          if (settingsData.primaryH) setPrimaryH(settingsData.primaryH)
+          if (settingsData.primaryS) setPrimaryS(settingsData.primaryS)
+          if (settingsData.primaryL) setPrimaryL(settingsData.primaryL)
+          if (settingsData.secondaryH) setSecondaryH(settingsData.secondaryH)
+          if (settingsData.secondaryS) setSecondaryS(settingsData.secondaryS)
+          if (settingsData.secondaryL) setSecondaryL(settingsData.secondaryL)
+          if (settingsData.bgH) setBgH(settingsData.bgH)
+          if (settingsData.bgS) setBgS(settingsData.bgS)
+          if (settingsData.bgL) setBgL(settingsData.bgL)
+          if (settingsData.personaTone) setPersonaTone(settingsData.personaTone)
+        }
+      } catch (e) {
+        console.warn('Supabase initial fetch failed, falling back to local storage cache:', e)
+      }
+    }
+    loadSupabaseData()
+  }, [])
+
+  // Save states to local storage and sync to Supabase in the background
   useEffect(() => {
     localStorage.setItem('visualMode', visualMode)
+    const sync = async () => {
+      try {
+        await supabase.from('branding_settings').upsert({ id: 'suku-settings', visualMode })
+      } catch { /* silent fallback */ }
+    }
+    sync()
   }, [visualMode])
 
   useEffect(() => {
     localStorage.setItem('borderRadius', borderRadius.toString())
+    const sync = async () => {
+      try {
+        await supabase.from('branding_settings').upsert({ id: 'suku-settings', borderRadius })
+      } catch { /* silent fallback */ }
+    }
+    sync()
   }, [borderRadius])
 
   useEffect(() => {
     localStorage.setItem('primaryH', primaryH.toString())
     localStorage.setItem('primaryS', primaryS)
     localStorage.setItem('primaryL', primaryL)
+    const sync = async () => {
+      try {
+        await supabase.from('branding_settings').upsert({ id: 'suku-settings', primaryH, primaryS, primaryL })
+      } catch { /* silent fallback */ }
+    }
+    sync()
   }, [primaryH, primaryS, primaryL])
 
   useEffect(() => {
     localStorage.setItem('secondaryH', secondaryH.toString())
     localStorage.setItem('secondaryS', secondaryS)
     localStorage.setItem('secondaryL', secondaryL)
+    const sync = async () => {
+      try {
+        await supabase.from('branding_settings').upsert({ id: 'suku-settings', secondaryH, secondaryS, secondaryL })
+      } catch { /* silent fallback */ }
+    }
+    sync()
   }, [secondaryH, secondaryS, secondaryL])
 
   useEffect(() => {
     localStorage.setItem('bgH', bgH.toString())
     localStorage.setItem('bgS', bgS)
     localStorage.setItem('bgL', bgL)
+    const sync = async () => {
+      try {
+        await supabase.from('branding_settings').upsert({ id: 'suku-settings', bgH, bgS, bgL })
+      } catch { /* silent fallback */ }
+    }
+    sync()
   }, [bgH, bgS, bgL])
 
   useEffect(() => {
     localStorage.setItem('personaTone', personaTone)
+    const sync = async () => {
+      try {
+        await supabase.from('branding_settings').upsert({ id: 'suku-settings', personaTone })
+      } catch { /* silent fallback */ }
+    }
+    sync()
   }, [personaTone])
 
   useEffect(() => {
     localStorage.setItem('profile', JSON.stringify(profile))
+    const sync = async () => {
+      try {
+        await supabase.from('profiles').upsert({ id: 'suku-operator', ...profile })
+      } catch { /* silent fallback */ }
+    }
+    sync()
   }, [profile])
 
   useEffect(() => {
     localStorage.setItem('services', JSON.stringify(services))
+    const sync = async () => {
+      try {
+        const ids = services.map(s => s.id)
+        if (ids.length > 0) {
+          await supabase.from('services').delete().filter('id', 'not.in', `(${ids.join(',')})`)
+        } else {
+          await supabase.from('services').delete().neq('id', '')
+        }
+        for (const s of services) {
+          await supabase.from('services').upsert(s)
+        }
+      } catch { /* silent fallback */ }
+    }
+    sync()
   }, [services])
 
   useEffect(() => {
     localStorage.setItem('projects', JSON.stringify(projects))
+    const sync = async () => {
+      try {
+        const ids = projects.map(p => p.id)
+        if (ids.length > 0) {
+          await supabase.from('projects').delete().filter('id', 'not.in', `(${ids.join(',')})`)
+        } else {
+          await supabase.from('projects').delete().neq('id', '')
+        }
+        for (const p of projects) {
+          await supabase.from('projects').upsert(p)
+        }
+      } catch { /* silent fallback */ }
+    }
+    sync()
   }, [projects])
 
   useEffect(() => {
     localStorage.setItem('certifications', JSON.stringify(certifications))
+    const sync = async () => {
+      try {
+        const ids = certifications.map(c => c.id)
+        if (ids.length > 0) {
+          await supabase.from('certifications').delete().filter('id', 'not.in', `(${ids.join(',')})`)
+        } else {
+          await supabase.from('certifications').delete().neq('id', '')
+        }
+        for (const c of certifications) {
+          await supabase.from('certifications').upsert(c)
+        }
+      } catch { /* silent fallback */ }
+    }
+    sync()
   }, [certifications])
 
   useEffect(() => {
     localStorage.setItem('metrics', JSON.stringify(metrics))
+    const sync = async () => {
+      try {
+        const ids = metrics.map(m => m.id)
+        if (ids.length > 0) {
+          await supabase.from('metrics').delete().filter('id', 'not.in', `(${ids.join(',')})`)
+        } else {
+          await supabase.from('metrics').delete().neq('id', '')
+        }
+        for (const m of metrics) {
+          await supabase.from('metrics').upsert(m)
+        }
+      } catch { /* silent fallback */ }
+    }
+    sync()
   }, [metrics])
 
   useEffect(() => {
     localStorage.setItem('heroCopy', JSON.stringify(heroCopy))
+    const sync = async () => {
+      try {
+        for (const tone of ['technologist', 'executive', 'academic'] as PersonaTone[]) {
+          const item = heroCopy[tone]
+          if (item) {
+            await supabase.from('hero_copy').upsert({
+              persona: tone,
+              eyebrow: item.eyebrow,
+              title: item.title,
+              description: item.description,
+              badges: item.badges,
+              card1Title: item.card1Title,
+              card1Subtitle: item.card1Subtitle,
+              card2Title: item.card2Title,
+              card2Subtitle: item.card2Subtitle
+            })
+          }
+        }
+      } catch { /* silent fallback */ }
+    }
+    sync()
   }, [heroCopy])
+
+  useEffect(() => {
+    localStorage.setItem('theme', theme)
+    const sync = async () => {
+      try {
+        await supabase.from('branding_settings').upsert({ id: 'suku-settings', theme })
+      } catch { /* silent fallback */ }
+    }
+    sync()
+  }, [theme])
 
   // Sync CSS properties on root element
   useEffect(() => {
