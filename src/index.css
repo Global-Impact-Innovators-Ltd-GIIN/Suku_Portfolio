@@ -209,16 +209,80 @@ body {
 
 .card-style.neumorphic {
   background: var(--bg-primary);
-  border: 1px solid transparent;
-  box-shadow: 8px 8px 16px var(--shadow-dark), -8px -8px 16px var(--shadow-light);
+  border: 1px solid rgba(255, 255, 255, 0.015);
+  box-shadow: 6px 6px 16px var(--shadow-dark), -6px -6px 16px var(--shadow-light);
   backdrop-filter: none;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+:root.light .card-style.neumorphic {
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: 8px 8px 20px var(--shadow-dark), -8px -8px 20px var(--shadow-light);
+}
+
+.card-style.neumorphic:hover {
+  transform: translateY(-2px);
+  box-shadow: 4px 4px 10px var(--shadow-dark), -4px -4px 10px var(--shadow-light);
 }
 
 .card-style.neumorphic-inset {
   background: var(--bg-primary);
   border: 1px solid transparent;
-  box-shadow: inset 8px 8px 16px var(--shadow-dark), inset -8px -8px 16px var(--shadow-light);
+  box-shadow: inset 6px 6px 12px var(--shadow-dark), inset -6px -6px 12px var(--shadow-light);
   backdrop-filter: none;
+}
+
+/* Apply Neumorphic controls globally when visualMode is neumorphic */
+.visual-mode-neumorphic input,
+.visual-mode-neumorphic textarea,
+.visual-mode-neumorphic select {
+  background: var(--bg-primary) !important;
+  border: 1px solid rgba(0, 0, 0, 0.05) !important;
+  box-shadow: inset 4px 4px 8px var(--shadow-dark), inset -4px -4px 8px var(--shadow-light) !important;
+  transition: all 0.3s ease;
+}
+
+.visual-mode-neumorphic input:focus,
+.visual-mode-neumorphic textarea:focus {
+  box-shadow: inset 2px 2px 4px var(--shadow-dark), inset -2px -2px 4px var(--shadow-light) !important;
+  border-color: var(--color-gold-accent) !important;
+}
+
+.visual-mode-neumorphic button.bg-gold-accent,
+.visual-mode-neumorphic button:not(.bg-transparent),
+.visual-mode-neumorphic .btn-style {
+  background: var(--bg-primary) !important;
+  border: 1px solid rgba(255, 255, 255, 0.01) !important;
+  box-shadow: 6px 6px 12px var(--shadow-dark), -6px -6px 12px var(--shadow-light) !important;
+  color: var(--text-primary) !important;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.visual-mode-neumorphic button.bg-gold-accent:hover,
+.visual-mode-neumorphic button:not(.bg-transparent):hover,
+.visual-mode-neumorphic .btn-style:hover {
+  transform: translateY(-1px);
+  box-shadow: 3px 3px 6px var(--shadow-dark), -3px -3px 6px var(--shadow-light) !important;
+  color: hsl(var(--primary-h), 82%, 50%) !important;
+}
+
+.visual-mode-neumorphic button.bg-gold-accent:active,
+.visual-mode-neumorphic button:not(.bg-transparent):active,
+.visual-mode-neumorphic .btn-style:active {
+  transform: translateY(0);
+  box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light) !important;
+}
+
+/* Neumorphic Sidebar overrides */
+.visual-mode-neumorphic aside {
+  background: var(--bg-primary) !important;
+  box-shadow: 8px 0 24px var(--shadow-dark), -8px 0 24px var(--shadow-light) !important;
+}
+
+/* Neumorphic Command Terminal overrides */
+.visual-mode-neumorphic .terminal-box {
+  background: var(--bg-primary) !important;
+  box-shadow: inset 8px 8px 24px var(--shadow-dark), inset -8px -8px 24px var(--shadow-light) !important;
 }
 
 .card-style.glassmorphic {

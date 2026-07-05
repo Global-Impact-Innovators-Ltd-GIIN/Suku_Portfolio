@@ -32,6 +32,7 @@ export interface CertItem {
   details: string
   date: string
   authority: string
+  imageUrl?: string
 }
 
 export interface MetricItem {
@@ -393,7 +394,8 @@ const DEFAULT_CERTS: CertItem[] = [
     issuer: 'AFRETEC (African Network for Education in Science and Technology)',
     details: 'Comprehensive security analytics, cryptography, endpoint protection, infrastructure audits, and risk vectors.',
     date: '2025',
-    authority: 'AFRETEC Network'
+    authority: 'AFRETEC Network',
+    imageUrl: '/cyber_cert_doc.png'
   },
   {
     id: 'c2',
@@ -401,7 +403,8 @@ const DEFAULT_CERTS: CertItem[] = [
     issuer: 'Carnegie Mellon University Africa',
     details: 'Advanced engineering paradigms, computing models, systems, and professional technology translation.',
     date: '2024',
-    authority: 'CMU-Africa'
+    authority: 'CMU-Africa',
+    imageUrl: '/cyber_cert_doc.png'
   },
   {
     id: 'c3',
@@ -409,7 +412,8 @@ const DEFAULT_CERTS: CertItem[] = [
     issuer: 'UNILAK (University of Lay Adventists of Kigali)',
     details: 'Final-year specialization in enterprise routing/switching, system architecture, database administration, and security.',
     date: 'Expected 2026',
-    authority: 'UNILAK IT Dept'
+    authority: 'UNILAK IT Dept',
+    imageUrl: '/cyber_cert_doc.png'
   },
   {
     id: 'c4',
@@ -417,7 +421,8 @@ const DEFAULT_CERTS: CertItem[] = [
     issuer: 'Global Impact Innovators Ltd. (GIIN)',
     details: 'Strategic leadership, venture creation, African digital ecosystem deployment, and technology project consulting.',
     date: 'Current',
-    authority: 'GIIN Leadership'
+    authority: 'GIIN Leadership',
+    imageUrl: '/cyber_cert_doc.png'
   }
 ]
 

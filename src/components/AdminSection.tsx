@@ -111,7 +111,7 @@ export default function AdminSection() {
   // List editor states
   const [newService, setNewService] = useState({ title: '', description: '', iconName: 'Code', badge: '' })
   const [newProject, setNewProject] = useState({ title: '', subtitle: '', category: 'dev' as any, tech: '', mockup: 'eye-tracking' as any, link: '', iconName: 'Cpu' })
-  const [newCert, setNewCert] = useState({ title: '', issuer: '', details: '', date: '', authority: '' })
+  const [newCert, setNewCert] = useState({ title: '', issuer: '', details: '', date: '', authority: '', imageUrl: '' })
 
   const profilePicInput = useRef<HTMLInputElement>(null)
   const logoPicInput = useRef<HTMLInputElement>(null)
@@ -220,7 +220,7 @@ export default function AdminSection() {
     if (!newCert.title || !newCert.issuer) return
     const item = { ...newCert, id: `c-${Date.now()}` }
     setCertifications([...certifications, item])
-    setNewCert({ title: '', issuer: '', details: '', date: '', authority: '' })
+    setNewCert({ title: '', issuer: '', details: '', date: '', authority: '', imageUrl: '' })
     showSuccess('Certification added successfully!')
   }
 
@@ -1260,6 +1260,31 @@ export default function AdminSection() {
                       <div className="space-y-1">
                         <label className="text-muted-gray text-[9px] uppercase font-bold pl-1">Authority ID</label>
                         <input type="text" placeholder="e.g. Cert# 804-92" value={newCert.authority} onChange={(e) => setNewCert({ ...newCert, authority: e.target.value })} className="w-full px-3 py-2 bg-obsidian border border-dark-navy/40 rounded-lg text-xs outline-none text-silver-text" />
+                      </div>
+
+                      {/* File Uploader Row */}
+                      <div className="sm:col-span-2 space-y-1">
+                        <label className="text-muted-gray text-[9px] uppercase font-bold pl-1">Upload Certificate File (Image preview)</label>
+                        <div className="flex items-center space-x-3 bg-obsidian/50 border border-dark-navy/40 rounded-lg p-1">
+                          <input 
+                            type="file" 
+                            accept="image/*" 
+                            onChange={(e) => {
+                              const file = e.target.files?.[0]
+                              if (file) {
+                                const reader = new FileReader()
+                                reader.onloadend = () => {
+                                  setNewCert({ ...newCert, imageUrl: reader.result as string })
+                                }
+                                reader.readAsDataURL(file)
+                              }
+                            }}
+                            className="w-full text-[10px] text-muted-gray file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-[9px] file:font-bold file:bg-gold-accent/15 file:text-gold-accent hover:file:bg-gold-accent/25 file:cursor-pointer"
+                          />
+                          {newCert.imageUrl && (
+                            <img src={newCert.imageUrl} alt="preview" className="w-8 h-8 object-cover rounded border border-dark-navy flex-shrink-0" />
+                          )}
+                        </div>
                       </div>
                     </form>
 

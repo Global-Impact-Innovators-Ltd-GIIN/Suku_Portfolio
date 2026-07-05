@@ -61,9 +61,21 @@ export default function CertificationsAndMetrics() {
           {certifications.map((cert, index) => (
             <div
               key={index}
-              className={`group p-8 border border-dark-navy/40 hover:border-gold-accent/30 transition-all duration-300 relative flex flex-col justify-between card-style ${visualMode}`}
+              className={`group border border-dark-navy/40 hover:border-gold-accent/30 transition-all duration-500 overflow-hidden flex flex-col justify-between card-style bg-deep-obsidian/20 shadow-navy-glow ${visualMode}`}
             >
-              <div className="space-y-4">
+              {/* Certificate Image Top Wrapper */}
+              {cert.imageUrl && (
+                <div className="relative h-48 w-full overflow-hidden border-b border-dark-navy/35 bg-black/40">
+                  <img 
+                    src={cert.imageUrl} 
+                    alt={cert.title} 
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" 
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#020205]/80 via-transparent to-transparent opacity-60" />
+                </div>
+              )}
+
+              <div className="p-8 space-y-4 flex-grow">
                 <div className="flex justify-between items-start">
                   <div className="w-10 h-10 rounded-xl bg-gold-accent/10 border border-gold-accent/20 flex items-center justify-center text-gold-accent">
                     <LucideIcons.Award className="w-5 h-5" />
@@ -74,7 +86,7 @@ export default function CertificationsAndMetrics() {
                 </div>
 
                 <div className="space-y-2">
-                  <h3 className="text-silver-text font-bold text-lg group-hover:text-gold-accent transition-colors duration-300 font-sans">
+                  <h3 className="text-silver-text font-bold text-lg group-hover:text-gold-accent transition-colors duration-300 font-sans leading-snug">
                     {cert.title}
                   </h3>
                   <p className="text-gold-accent font-medium text-[11px] tracking-wider uppercase font-sans">
@@ -87,9 +99,12 @@ export default function CertificationsAndMetrics() {
               </div>
 
               {/* Bottom Authority verification tag */}
-              <div className="pt-6 mt-6 border-t border-dark-navy/40 flex justify-between items-center text-[10px] text-muted-gray">
+              <div className="px-8 pb-8 pt-4 border-t border-dark-navy/40 flex justify-between items-center text-[10px] text-muted-gray">
                 <span>Authority: {cert.authority}</span>
-                <span className="text-gold-accent font-semibold">Verified Badge</span>
+                <span className="text-gold-accent font-semibold flex items-center space-x-1">
+                  <LucideIcons.Shield className="w-3.5 h-3.5 text-glow" />
+                  <span>Verified Security Badge</span>
+                </span>
               </div>
             </div>
           ))}

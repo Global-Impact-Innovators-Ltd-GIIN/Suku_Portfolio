@@ -44,7 +44,7 @@ function AppContent() {
   const isAdminRoute = location.pathname === '/admin'
 
   return (
-    <div className="relative min-h-screen bg-deep-obsidian text-silver-text flex flex-col lg:flex-row antialiased select-none selection:bg-gold-accent/30 selection:text-white">
+    <div className={`relative min-h-screen bg-deep-obsidian text-silver-text flex flex-col lg:flex-row antialiased select-none selection:bg-gold-accent/30 selection:text-white visual-mode-${visualMode}`}>
       {/* 1. Global Ambient Mesh Lights & Digital Grid */}
       <BackgroundGlow />
 
