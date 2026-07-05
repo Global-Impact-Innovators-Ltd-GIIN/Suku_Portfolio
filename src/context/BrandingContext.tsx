@@ -626,6 +626,88 @@ export const BrandingProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     loadSupabaseData()
   }, [])
 
+  // Listen to Supabase realtime database changes
+  useEffect(() => {
+    const channel = supabase
+      .channel('schema-db-changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, (payload) => {
+        if (payload.new && Object.keys(payload.new).length > 0) {
+          setProfile(payload.new as ProfileDetails)
+        }
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'services' }, async () => {
+        try {
+          const { data } = await supabase.from('services').select('*')
+          if (data && data.length > 0) setServices(data)
+        } catch { /* fallback */ }
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'projects' }, async () => {
+        try {
+          const { data } = await supabase.from('projects').select('*')
+          if (data && data.length > 0) setProjects(data)
+        } catch { /* fallback */ }
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'certifications' }, async () => {
+        try {
+          const { data } = await supabase.from('certifications').select('*')
+          if (data && data.length > 0) setCertifications(data)
+        } catch { /* fallback */ }
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'metrics' }, async () => {
+        try {
+          const { data } = await supabase.from('metrics').select('*')
+          if (data && data.length > 0) setMetrics(data)
+        } catch { /* fallback */ }
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'hero_copy' }, async () => {
+        try {
+          const { data } = await supabase.from('hero_copy').select('*')
+          if (data && data.length > 0) {
+            const map: PersonaCopyMap = { ...DEFAULT_HERO_COPY }
+            data.forEach((row: any) => {
+              const tone = row.persona as PersonaTone
+              if (map[tone]) {
+                map[tone] = {
+                  eyebrow: row.eyebrow,
+                  title: row.title,
+                  description: row.description,
+                  badges: row.badges,
+                  card1Title: row.card1Title,
+                  card1Subtitle: row.card1Subtitle,
+                  card2Title: row.card2Title,
+                  card2Subtitle: row.card2Subtitle
+                }
+              }
+            })
+            setHeroCopy(map)
+          }
+        } catch { /* fallback */ }
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'branding_settings' }, (payload) => {
+        if (payload.new && Object.keys(payload.new).length > 0) {
+          const settings = payload.new as any
+          if (settings.theme) setThemeState(settings.theme)
+          if (settings.visualMode) setVisualMode(settings.visualMode)
+          if (settings.borderRadius) setBorderRadius(settings.borderRadius)
+          if (settings.primaryH) setPrimaryH(settings.primaryH)
+          if (settings.primaryS) setPrimaryS(settings.primaryS)
+          if (settings.primaryL) setPrimaryL(settings.primaryL)
+          if (settings.secondaryH) setSecondaryH(settings.secondaryH)
+          if (settings.secondaryS) setSecondaryS(settings.secondaryS)
+          if (settings.secondaryL) setSecondaryL(settings.secondaryL)
+          if (settings.bgH) setBgH(settings.bgH)
+          if (settings.bgS) setBgS(settings.bgS)
+          if (settings.bgL) setBgL(settings.bgL)
+          if (settings.personaTone) setPersonaTone(settings.personaTone)
+        }
+      })
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [])
+
   // Save states to local storage and sync to Supabase in the background
   useEffect(() => {
     localStorage.setItem('visualMode', visualMode)
