@@ -111,7 +111,7 @@ export default function HeroSection({ onWorkClick }: HeroProps) {
               {currentCopy.badges.map((badge, idx) => (
                 <span 
                   key={idx} 
-                  className={`text-silver-text font-bold text-xs px-3 py-1.5 border border-gold-accent/20 card-style ${visualMode}`}
+                  className="badge-style"
                 >
                   {badge}
                 </span>
