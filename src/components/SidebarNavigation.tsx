@@ -15,7 +15,7 @@ import {
   Moon,
   Settings
 } from 'lucide-react'
-import { GithubIcon, LinkedinIcon, WhatsappIcon } from './Icons'
+import { GithubIcon, LinkedinIcon, WhatsappIcon, FacebookIcon, InstagramIcon, TiktokIcon } from './Icons'
 import { useBranding } from '../context/BrandingContext'
 
 interface SidebarProps {
@@ -25,6 +25,7 @@ interface SidebarProps {
 
 export default function SidebarNavigation({ activeSection, onNavClick }: SidebarProps) {
   const [isOpen, setIsOpen] = useState(false)
+  const [showFormatPicker, setShowFormatPicker] = useState(false)
   const { theme, toggleTheme, visualMode, profile, downloadCV } = useBranding()
 
   const navItems = [
@@ -126,23 +127,58 @@ export default function SidebarNavigation({ activeSection, onNavClick }: Sidebar
 
       {/* Bottom CV and Social Links */}
       <div className="pt-4 border-t border-dark-navy/40">
-        <div className="mb-4">
+        <div className="mb-4 relative">
           <p className="text-muted-gray text-[10px] uppercase font-bold tracking-widest mb-2 px-1">Download CV</p>
           <button
-            onClick={downloadCV}
+            onClick={() => setShowFormatPicker(!showFormatPicker)}
             className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl border border-dark-navy hover:border-gold-accent/40 bg-obsidian text-xs hover:text-silver-text transition-all duration-300 group cursor-pointer text-left"
           >
             <span className="font-semibold text-muted-gray group-hover:text-silver-text truncate pr-2">
-              Mensah_Suku_CV_Verified.png
+              Select Export Format...
             </span>
             <Download className="w-4 h-4 text-gold-accent group-hover:scale-110 transition-transform duration-300 flex-shrink-0" />
           </button>
+
+          {showFormatPicker && (
+            <div className="absolute bottom-full left-0 right-0 mb-2 bg-deep-obsidian border border-dark-navy/60 rounded-xl overflow-hidden shadow-2xl z-50 flex flex-col divide-y divide-dark-navy/30">
+              <button
+                onClick={() => {
+                  downloadCV('pdf')
+                  setShowFormatPicker(false)
+                }}
+                className="w-full text-left px-4 py-2.5 text-silver-text hover:bg-gold-accent hover:text-[#111C33] text-xs font-bold transition-all duration-200 cursor-pointer flex items-center justify-between"
+              >
+                <span>Export as PDF Document</span>
+                <span className="text-[9px] uppercase tracking-wider opacity-60">.pdf</span>
+              </button>
+              <button
+                onClick={() => {
+                  downloadCV('word')
+                  setShowFormatPicker(false)
+                }}
+                className="w-full text-left px-4 py-2.5 text-silver-text hover:bg-gold-accent hover:text-[#111C33] text-xs font-bold transition-all duration-200 cursor-pointer flex items-center justify-between"
+              >
+                <span>Export as Word Document</span>
+                <span className="text-[9px] uppercase tracking-wider opacity-60">.doc</span>
+              </button>
+              <button
+                onClick={() => {
+                  downloadCV('png')
+                  setShowFormatPicker(false)
+                }}
+                className="w-full text-left px-4 py-2.5 text-silver-text hover:bg-gold-accent hover:text-[#111C33] text-xs font-bold transition-all duration-200 cursor-pointer flex items-center justify-between"
+              >
+                <span>Export as High-Res Image</span>
+                <span className="text-[9px] uppercase tracking-wider opacity-60">.png</span>
+              </button>
+            </div>
+          )}
         </div>
 
         <div>
           <p className="text-muted-gray text-[10px] uppercase font-bold tracking-widest mb-2 px-1">Connect With Me</p>
           <div className="flex flex-wrap gap-2 px-1 items-center justify-between w-full">
-            <div className="flex flex-wrap gap-1.5 items-center max-w-[70%]">
+            <div className="flex flex-wrap gap-1.5 items-center max-w-[75%]">
               {profile.linkedinUrl && (
                 <a
                   href={profile.linkedinUrl}
@@ -163,6 +199,39 @@ export default function SidebarNavigation({ activeSection, onNavClick }: Sidebar
                   title="WhatsApp Contact"
                 >
                   <WhatsappIcon className="w-3.5 h-3.5" />
+                </a>
+              )}
+              {profile.facebookUrl && (
+                <a
+                  href={profile.facebookUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="p-2 rounded-xl bg-dark-navy hover:bg-gold-accent hover:text-[#111C33] text-gold-accent transition-all duration-300 border border-gold-accent/15"
+                  title="Facebook Profile"
+                >
+                  <FacebookIcon className="w-3.5 h-3.5" />
+                </a>
+              )}
+              {profile.instagramUrl && (
+                <a
+                  href={profile.instagramUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="p-2 rounded-xl bg-dark-navy hover:bg-gold-accent hover:text-[#111C33] text-gold-accent transition-all duration-300 border border-gold-accent/15"
+                  title="Instagram Profile"
+                >
+                  <InstagramIcon className="w-3.5 h-3.5" />
+                </a>
+              )}
+              {profile.tiktokUrl && (
+                <a
+                  href={profile.tiktokUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="p-2 rounded-xl bg-dark-navy hover:bg-gold-accent hover:text-[#111C33] text-gold-accent transition-all duration-300 border border-gold-accent/15"
+                  title="TikTok Profile"
+                >
+                  <TiktokIcon className="w-3.5 h-3.5" />
                 </a>
               )}
               {profile.githubUrl && (

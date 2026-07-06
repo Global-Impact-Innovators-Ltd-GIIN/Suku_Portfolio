@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Mail, MapPin, Send, CheckCircle2 } from 'lucide-react'
+import { Mail, MapPin, Send, CheckCircle2, Phone } from 'lucide-react'
 import { WhatsappIcon } from './Icons'
 import { useBranding } from '../context/BrandingContext'
 
@@ -132,6 +132,20 @@ export default function ContactSection() {
                     </p>
                   </div>
                 </div>
+
+                {profile.phone && (
+                  <div className="flex items-center space-x-4">
+                    <div className="w-10 h-10 rounded-xl bg-gold-accent/10 border border-gold-accent/20 flex items-center justify-center text-gold-accent">
+                      <Phone className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <p className="text-muted-gray text-[9px] uppercase font-bold tracking-widest">Phone Line</p>
+                      <a href={`tel:${profile.phone}`} className="text-silver-text font-bold text-xs hover:text-gold-accent transition-colors">
+                        {profile.phone}
+                      </a>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 

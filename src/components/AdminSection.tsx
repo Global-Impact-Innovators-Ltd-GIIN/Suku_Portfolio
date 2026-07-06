@@ -942,6 +942,46 @@ export default function AdminSection() {
                     </div>
 
                     <div className="space-y-1.5">
+                      <label className="text-muted-gray text-xs uppercase font-bold tracking-wider pl-1">Phone Number</label>
+                      <input 
+                        type="text" 
+                        value={profile.phone || ''} 
+                        onChange={(e) => setProfile({ ...profile, phone: e.target.value })} 
+                        className="w-full px-4 py-2.5 bg-obsidian border border-dark-navy/40 rounded-xl text-sm outline-none text-silver-text focus:border-gold-accent"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="text-muted-gray text-xs uppercase font-bold tracking-wider pl-1">Facebook URL</label>
+                      <input 
+                        type="text" 
+                        value={profile.facebookUrl || ''} 
+                        onChange={(e) => setProfile({ ...profile, facebookUrl: e.target.value })} 
+                        className="w-full px-4 py-2.5 bg-obsidian border border-dark-navy/40 rounded-xl text-sm outline-none text-silver-text focus:border-gold-accent"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="text-muted-gray text-xs uppercase font-bold tracking-wider pl-1">Instagram URL</label>
+                      <input 
+                        type="text" 
+                        value={profile.instagramUrl || ''} 
+                        onChange={(e) => setProfile({ ...profile, instagramUrl: e.target.value })} 
+                        className="w-full px-4 py-2.5 bg-obsidian border border-dark-navy/40 rounded-xl text-sm outline-none text-silver-text focus:border-gold-accent"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="text-muted-gray text-xs uppercase font-bold tracking-wider pl-1">TikTok URL</label>
+                      <input 
+                        type="text" 
+                        value={profile.tiktokUrl || ''} 
+                        onChange={(e) => setProfile({ ...profile, tiktokUrl: e.target.value })} 
+                        className="w-full px-4 py-2.5 bg-obsidian border border-dark-navy/40 rounded-xl text-sm outline-none text-silver-text focus:border-gold-accent"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
                       <label className="text-muted-gray text-xs uppercase font-bold tracking-wider pl-1">Location Coordinates</label>
                       <input 
                         type="text" 

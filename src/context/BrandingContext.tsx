@@ -1,5 +1,6 @@
 /* eslint-disable react-refresh/only-export-components */
 import React, { createContext, useContext, useState, useEffect } from 'react'
+import { jsPDF } from 'jspdf'
 import { supabase } from '../supabaseClient'
 
 export type VisualMode = 'flat' | 'neumorphic' | 'glassmorphic' | 'claymorphic'
@@ -236,6 +237,10 @@ export interface ProfileDetails {
   email: string
   email2?: string
   whatsappUrl?: string
+  phone?: string
+  facebookUrl?: string
+  instagramUrl?: string
+  tiktokUrl?: string
   location: string
   cvPath: string
   linkedinUrl: string
@@ -299,7 +304,7 @@ interface BrandingContextType {
   setAdminPassword: (password: string) => void
   heroCopy: PersonaCopyMap
   setHeroCopy: (copy: PersonaCopyMap) => void
-  downloadCV: () => void
+  downloadCV: (format: 'pdf' | 'word' | 'png') => void
 }
 
 const BrandingContext = createContext<BrandingContextType | undefined>(undefined)
@@ -312,6 +317,10 @@ const DEFAULT_PROFILE: ProfileDetails = {
   email: 'mensahqsukujr@gmail.com',
   email2: 'globalimpactinnovatorsltd@gmail.com',
   whatsappUrl: 'https://wa.me/233240000000', // default WhatsApp link or format
+  phone: '+250 788 000 000',
+  facebookUrl: 'https://facebook.com',
+  instagramUrl: 'https://instagram.com',
+  tiktokUrl: 'https://tiktok.com',
   location: 'Kigali, Rwanda',
   cvPath: '/Mensah_Suku_CV.pdf',
   linkedinUrl: 'https://linkedin.com',
@@ -956,7 +965,63 @@ export const BrandingProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     applyPreset(COLOR_PRESETS[0]) // 8Bees Premium
   }
 
-  const downloadCV = () => {
+  const downloadCV = (format: 'pdf' | 'word' | 'png') => {
+    if (format === 'word') {
+      const activeCopy = heroCopy[personaTone] || heroCopy.technologist
+      const docContent = `
+        <html xmlns:o="urn:schemas-microsoft-excel-description-data:office:office" xmlns:w="urn:schemas-microsoft-excel-description-data:office:word" xmlns="http://www.w3.org/TR/REC-html40">
+        <head>
+          <title>Curriculum Vitae - ${profile.name}</title>
+          <style>
+            body { font-family: 'Arial', sans-serif; color: #333333; line-height: 1.5; padding: 20px; }
+            h1 { color: #A5BF13; font-size: 26pt; margin-bottom: 2px; text-transform: uppercase; }
+            h2 { color: #292929; border-bottom: 2px solid #A5BF13; font-size: 16pt; margin-top: 20px; padding-bottom: 3px; }
+            .subtitle { font-size: 14pt; font-weight: bold; color: #555555; }
+            .contact-info { font-size: 10pt; margin-bottom: 20px; color: #666666; }
+            .item-title { font-weight: bold; font-size: 11pt; color: #292929; }
+            .item-subtitle { font-style: italic; font-size: 10pt; color: #555555; }
+            .item-desc { font-size: 10pt; margin-bottom: 10px; color: #666666; }
+          </style>
+        </head>
+        <body>
+          <h1>${profile.name.toUpperCase()}</h1>
+          <div class="subtitle">${profile.role} - ${profile.company}</div>
+          <div class="contact-info">
+            📍 Location: ${profile.location} | 📧 Primary Email: ${profile.email} ${profile.email2 ? `| 📧 Secondary Email: ${profile.email2}` : ''} | 📞 Phone: ${profile.phone || '+250 788 000 000'}
+          </div>
+          
+          <h2>PROFESSIONAL SUMMARY</h2>
+          <p>${activeCopy.description}</p>
+          
+          <h2>SECURITY CREDENTIALS & CERTIFICATIONS</h2>
+          ${certifications.map(c => `
+            <div>
+              <span class="item-title">${c.title}</span> - <span class="item-subtitle">${c.issuer} (${c.date})</span>
+              <p class="item-desc">${c.details}<br/>Authority ID: ${c.authority}</p>
+            </div>
+          `).join('')}
+          
+          <h2>SELECTED PROJECTS</h2>
+          ${projects.map(p => `
+            <div>
+              <span class="item-title">${p.title}</span> - <span class="item-subtitle">${p.subtitle}</span>
+              <p class="item-desc">Stack: ${p.tech.join(', ')}</p>
+            </div>
+          `).join('')}
+        </body>
+        </html>
+      `
+      const blob = new Blob(['\ufeff' + docContent], { type: 'application/msword' })
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `Mensah_Suku_CV_Verified.doc`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      return
+    }
+
     const canvas = document.createElement('canvas')
     canvas.width = 1200
     canvas.height = 1650
@@ -994,11 +1059,14 @@ export const BrandingProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
     // Details text
     ctx.fillStyle = '#555555'
-    ctx.font = '14px sans-serif'
+    ctx.font = '13px sans-serif'
     ctx.fillText(`📧 ${profile.email}`, 40, 290)
-    ctx.fillText(`📞 +250 780 000 000`, 40, 325)
-    ctx.fillText(`📍 ${profile.location}`, 40, 360)
-    ctx.fillText(`🔗 linkedin.com/in/mensah-suku`, 40, 395)
+    if (profile.email2) {
+      ctx.fillText(`📧 ${profile.email2}`, 40, 320)
+    }
+    ctx.fillText(`📞 ${profile.phone || '+250 788 000 000'}`, 40, 350)
+    ctx.fillText(`📍 ${profile.location}`, 40, 380)
+    ctx.fillText(`🔗 linkedin.com/in/mensah-suku`, 40, 410)
 
     // Skills Section
     ctx.fillStyle = '#292929'
@@ -1113,13 +1181,24 @@ export const BrandingProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
     ctx.restore()
 
-    const url = canvas.toDataURL('image/png')
-    const link = document.createElement('a')
-    link.href = url
-    link.download = `Mensah_Suku_CV_Verified.png`
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
+    if (format === 'pdf') {
+      const imgData = canvas.toDataURL('image/png')
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'px',
+        format: [1200, 1650]
+      })
+      pdf.addImage(imgData, 'PNG', 0, 0, 1200, 1650)
+      pdf.save(`Mensah_Suku_CV_Verified.pdf`)
+    } else {
+      const url = canvas.toDataURL('image/png')
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `Mensah_Suku_CV_Verified.png`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+    }
   }
 
   return (
