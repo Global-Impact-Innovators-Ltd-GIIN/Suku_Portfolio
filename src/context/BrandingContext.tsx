@@ -234,12 +234,17 @@ export interface ProfileDetails {
   role: string
   company: string
   email: string
+  email2?: string
+  whatsappUrl?: string
   location: string
   cvPath: string
   linkedinUrl: string
   githubUrl: string
-  profileImage: string // Base64 or path
-  logoImage: string // Base64 or path
+  githubUrl2?: string
+  githubUrl3?: string
+  githubUrl4?: string
+  profileImage: string
+  logoImage: string
 }
 
 interface BrandingContextType {
@@ -305,10 +310,15 @@ const DEFAULT_PROFILE: ProfileDetails = {
   role: 'Founder & CEO',
   company: 'Global Impact Innovators Ltd (GIIN)',
   email: 'mensahqsukujr@gmail.com',
+  email2: 'globalimpactinnovatorsltd@gmail.com',
+  whatsappUrl: 'https://wa.me/233240000000', // default WhatsApp link or format
   location: 'Kigali, Rwanda',
   cvPath: '/Mensah_Suku_CV.pdf',
   linkedinUrl: 'https://linkedin.com',
-  githubUrl: 'https://github.com',
+  githubUrl: 'https://github.com/nimdaukus',
+  githubUrl2: 'https://github.com/Global-Impact-Innovators-Ltd-GIIN',
+  githubUrl3: 'https://github.com',
+  githubUrl4: 'https://github.com',
   profileImage: '/profile.png',
   logoImage: ''
 }

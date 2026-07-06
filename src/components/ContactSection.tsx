@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Mail, MapPin, Send, CheckCircle2 } from 'lucide-react'
+import { WhatsappIcon } from './Icons'
 import { useBranding } from '../context/BrandingContext'
 
 export default function ContactSection() {
@@ -85,12 +86,40 @@ export default function ContactSection() {
                     <Mail className="w-4 h-4" />
                   </div>
                   <div>
-                    <p className="text-muted-gray text-[9px] uppercase font-bold tracking-widest">Email Point</p>
-                    <a href={`mailto:${profile.email}`} className="text-silver-text font-bold text-sm hover:text-gold-accent transition-colors">
+                    <p className="text-muted-gray text-[9px] uppercase font-bold tracking-widest">Primary Email</p>
+                    <a href={`mailto:${profile.email}`} className="text-silver-text font-bold text-xs hover:text-gold-accent transition-colors break-all">
                       {profile.email}
                     </a>
                   </div>
                 </div>
+
+                {profile.email2 && (
+                  <div className="flex items-center space-x-4">
+                    <div className="w-10 h-10 rounded-xl bg-gold-accent/10 border border-gold-accent/20 flex items-center justify-center text-gold-accent">
+                      <Mail className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <p className="text-muted-gray text-[9px] uppercase font-bold tracking-widest">Secondary Email</p>
+                      <a href={`mailto:${profile.email2}`} className="text-silver-text font-bold text-xs hover:text-gold-accent transition-colors break-all">
+                        {profile.email2}
+                      </a>
+                    </div>
+                  </div>
+                )}
+
+                {profile.whatsappUrl && (
+                  <div className="flex items-center space-x-4">
+                    <div className="w-10 h-10 rounded-xl bg-gold-accent/10 border border-gold-accent/20 flex items-center justify-center text-gold-accent">
+                      <WhatsappIcon className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <p className="text-muted-gray text-[9px] uppercase font-bold tracking-widest">WhatsApp Direct</p>
+                      <a href={profile.whatsappUrl} target="_blank" rel="noopener noreferrer" className="text-silver-text font-bold text-xs hover:text-gold-accent transition-colors">
+                        Open Chat
+                      </a>
+                    </div>
+                  </div>
+                )}
 
                 <div className="flex items-center space-x-4">
                   <div className="w-10 h-10 rounded-xl bg-gold-accent/10 border border-gold-accent/20 flex items-center justify-center text-gold-accent">
@@ -98,7 +127,7 @@ export default function ContactSection() {
                   </div>
                   <div>
                     <p className="text-muted-gray text-[9px] uppercase font-bold tracking-widest">Location</p>
-                    <p className="text-silver-text font-bold text-sm">
+                    <p className="text-silver-text font-bold text-xs">
                       {profile.location}
                     </p>
                   </div>

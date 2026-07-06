@@ -15,7 +15,7 @@ import {
   Moon,
   Settings
 } from 'lucide-react'
-import { GithubIcon, LinkedinIcon } from './Icons'
+import { GithubIcon, LinkedinIcon, WhatsappIcon } from './Icons'
 import { useBranding } from '../context/BrandingContext'
 
 interface SidebarProps {
@@ -141,47 +141,97 @@ export default function SidebarNavigation({ activeSection, onNavClick }: Sidebar
 
         <div>
           <p className="text-muted-gray text-[10px] uppercase font-bold tracking-widest mb-2 px-1">Connect With Me</p>
-          <div className="flex items-center space-x-2 px-1">
-            {profile.linkedinUrl && (
-              <a
-                href={profile.linkedinUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="p-2.5 rounded-xl bg-dark-navy hover:bg-gold-accent hover:text-[#111C33] text-gold-accent transition-all duration-300 border border-gold-accent/15"
-              >
-                <LinkedinIcon className="w-4 h-4" />
-              </a>
-            )}
-            {profile.githubUrl && (
-              <a
-                href={profile.githubUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="p-2.5 rounded-xl bg-dark-navy hover:bg-gold-accent hover:text-[#111C33] text-gold-accent transition-all duration-300 border border-gold-accent/15"
-              >
-                <GithubIcon className="w-4 h-4" />
-              </a>
-            )}
+          <div className="flex flex-wrap gap-2 px-1 items-center justify-between w-full">
+            <div className="flex flex-wrap gap-1.5 items-center max-w-[70%]">
+              {profile.linkedinUrl && (
+                <a
+                  href={profile.linkedinUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="p-2 rounded-xl bg-dark-navy hover:bg-gold-accent hover:text-[#111C33] text-gold-accent transition-all duration-300 border border-gold-accent/15"
+                  title="LinkedIn Profile"
+                >
+                  <LinkedinIcon className="w-3.5 h-3.5" />
+                </a>
+              )}
+              {profile.whatsappUrl && (
+                <a
+                  href={profile.whatsappUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="p-2 rounded-xl bg-dark-navy hover:bg-gold-accent hover:text-[#111C33] text-gold-accent transition-all duration-300 border border-gold-accent/15"
+                  title="WhatsApp Contact"
+                >
+                  <WhatsappIcon className="w-3.5 h-3.5" />
+                </a>
+              )}
+              {profile.githubUrl && (
+                <a
+                  href={profile.githubUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="p-2 rounded-xl bg-dark-navy hover:bg-gold-accent hover:text-[#111C33] text-gold-accent transition-all duration-300 border border-gold-accent/15"
+                  title="GitHub Account 1"
+                >
+                  <GithubIcon className="w-3.5 h-3.5" />
+                </a>
+              )}
+              {profile.githubUrl2 && (
+                <a
+                  href={profile.githubUrl2}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="p-2 rounded-xl bg-dark-navy hover:bg-gold-accent hover:text-[#111C33] text-gold-accent transition-all duration-300 border border-gold-accent/15"
+                  title="GitHub Account 2"
+                >
+                  <GithubIcon className="w-3.5 h-3.5" />
+                </a>
+              )}
+              {profile.githubUrl3 && (
+                <a
+                  href={profile.githubUrl3}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="p-2 rounded-xl bg-dark-navy hover:bg-gold-accent hover:text-[#111C33] text-gold-accent transition-all duration-300 border border-gold-accent/15"
+                  title="GitHub Account 3"
+                >
+                  <GithubIcon className="w-3.5 h-3.5" />
+                </a>
+              )}
+              {profile.githubUrl4 && (
+                <a
+                  href={profile.githubUrl4}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="p-2 rounded-xl bg-dark-navy hover:bg-gold-accent hover:text-[#111C33] text-gold-accent transition-all duration-300 border border-gold-accent/15"
+                  title="GitHub Account 4"
+                >
+                  <GithubIcon className="w-3.5 h-3.5" />
+                </a>
+              )}
+            </div>
 
-            {/* Admin Control Dashboard gear icon */}
-            <button
-              onClick={() => handleLinkClick('admin')}
-              className={`p-2.5 rounded-xl bg-dark-navy hover:bg-gold-accent hover:text-[#111C33] transition-all duration-300 border border-gold-accent/15 cursor-pointer ml-auto mr-1 ${
-                activeSection === 'admin' ? 'text-gold-accent shadow-gold-glow bg-dark-navy-light' : 'text-gold-accent'
-              }`}
-              aria-label="Admin Control Settings"
-            >
-              <Settings className="w-4 h-4" />
-            </button>
+            <div className="flex items-center space-x-1.5 ml-auto">
+              {/* Admin Control Dashboard gear icon */}
+              <button
+                onClick={() => handleLinkClick('admin')}
+                className={`p-2 rounded-xl bg-dark-navy hover:bg-gold-accent hover:text-[#111C33] transition-all duration-300 border border-gold-accent/15 cursor-pointer ${
+                  activeSection === 'admin' ? 'text-gold-accent shadow-gold-glow bg-dark-navy-light' : 'text-gold-accent'
+                }`}
+                aria-label="Admin Control Settings"
+              >
+                <Settings className="w-3.5 h-3.5" />
+              </button>
 
-            {/* Theme Toggle next to socials */}
-            <button
-              onClick={toggleTheme}
-              className="p-2.5 rounded-xl bg-dark-navy hover:bg-gold-accent hover:text-[#111C33] text-gold-accent transition-all duration-300 border border-gold-accent/15 cursor-pointer"
-              aria-label="Toggle Theme"
-            >
-              {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-            </button>
+              {/* Theme Toggle next to socials */}
+              <button
+                onClick={toggleTheme}
+                className="p-2 rounded-xl bg-dark-navy hover:bg-gold-accent hover:text-[#111C33] text-gold-accent transition-all duration-300 border border-gold-accent/15 cursor-pointer"
+                aria-label="Toggle Theme"
+              >
+                {theme === 'dark' ? <Sun className="w-3.5 h-3.5" /> : <Moon className="w-3.5 h-3.5" />}
+              </button>
+            </div>
           </div>
         </div>
       </div>

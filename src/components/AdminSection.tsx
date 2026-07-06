@@ -912,11 +912,31 @@ export default function AdminSection() {
                     </div>
 
                     <div className="space-y-1.5">
-                      <label className="text-muted-gray text-xs uppercase font-bold tracking-wider pl-1">Email Endpoint</label>
+                      <label className="text-muted-gray text-xs uppercase font-bold tracking-wider pl-1">Primary Email</label>
                       <input 
                         type="email" 
                         value={profile.email} 
                         onChange={(e) => setProfile({ ...profile, email: e.target.value })} 
+                        className="w-full px-4 py-2.5 bg-obsidian border border-dark-navy/40 rounded-xl text-sm outline-none text-silver-text focus:border-gold-accent"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="text-muted-gray text-xs uppercase font-bold tracking-wider pl-1">Secondary Email</label>
+                      <input 
+                        type="email" 
+                        value={profile.email2 || ''} 
+                        onChange={(e) => setProfile({ ...profile, email2: e.target.value })} 
+                        className="w-full px-4 py-2.5 bg-obsidian border border-dark-navy/40 rounded-xl text-sm outline-none text-silver-text focus:border-gold-accent"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="text-muted-gray text-xs uppercase font-bold tracking-wider pl-1">WhatsApp URL</label>
+                      <input 
+                        type="text" 
+                        value={profile.whatsappUrl || ''} 
+                        onChange={(e) => setProfile({ ...profile, whatsappUrl: e.target.value })} 
                         className="w-full px-4 py-2.5 bg-obsidian border border-dark-navy/40 rounded-xl text-sm outline-none text-silver-text focus:border-gold-accent"
                       />
                     </div>
@@ -942,11 +962,41 @@ export default function AdminSection() {
                     </div>
 
                     <div className="space-y-1.5">
-                      <label className="text-muted-gray text-xs uppercase font-bold tracking-wider pl-1">GitHub Account</label>
+                      <label className="text-muted-gray text-xs uppercase font-bold tracking-wider pl-1">GitHub Account 1</label>
                       <input 
                         type="text" 
                         value={profile.githubUrl} 
                         onChange={(e) => setProfile({ ...profile, githubUrl: e.target.value })} 
+                        className="w-full px-4 py-2.5 bg-obsidian border border-dark-navy/40 rounded-xl text-sm outline-none text-silver-text focus:border-gold-accent"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="text-muted-gray text-xs uppercase font-bold tracking-wider pl-1">GitHub Account 2</label>
+                      <input 
+                        type="text" 
+                        value={profile.githubUrl2 || ''} 
+                        onChange={(e) => setProfile({ ...profile, githubUrl2: e.target.value })} 
+                        className="w-full px-4 py-2.5 bg-obsidian border border-dark-navy/40 rounded-xl text-sm outline-none text-silver-text focus:border-gold-accent"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="text-muted-gray text-xs uppercase font-bold tracking-wider pl-1">GitHub Account 3</label>
+                      <input 
+                        type="text" 
+                        value={profile.githubUrl3 || ''} 
+                        onChange={(e) => setProfile({ ...profile, githubUrl3: e.target.value })} 
+                        className="w-full px-4 py-2.5 bg-obsidian border border-dark-navy/40 rounded-xl text-sm outline-none text-silver-text focus:border-gold-accent"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="text-muted-gray text-xs uppercase font-bold tracking-wider pl-1">GitHub Account 4</label>
+                      <input 
+                        type="text" 
+                        value={profile.githubUrl4 || ''} 
+                        onChange={(e) => setProfile({ ...profile, githubUrl4: e.target.value })} 
                         className="w-full px-4 py-2.5 bg-obsidian border border-dark-navy/40 rounded-xl text-sm outline-none text-silver-text focus:border-gold-accent"
                       />
                     </div>
