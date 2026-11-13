@@ -11,6 +11,48 @@ import type { CVVariantContent, CVVariantId } from '../data/cvVariants'
 export const DEFAULT_ADMIN_PASSWORD_HASH =
   '63cd97af0603fc96d5e24c6c67877878dd2c359326aaaebfdc0ad075ab4a14fc'
 
+// Content versioning — invalidates stale saved portfolio content.
+// The six content keys below ('profile', 'services', 'projects',
+// 'certifications', 'metrics', 'heroCopy') are read from localStorage by
+// the state initializers in BrandingProvider. A browser that visited an
+// older version of this site still holds that old saved state, and it
+// would keep overriding the new shipped defaults on every load — a hard
+// refresh or a fresh URL cannot clear it, because localStorage is
+// per-origin and survives both. Saved content is therefore versioned:
+// when the stored version differs from CONTENT_STORAGE_VERSION (including
+// when it is missing — no version was stored before this fix), the six
+// content keys are removed once and the stored version is updated, so the
+// initializers fall through to the new defaults. Admin edits made after a
+// deploy are saved under the current version and keep loading normally.
+// RULE: bump this number whenever the shipped defaults change in a way old
+// saved state must not override.
+export const CONTENT_STORAGE_VERSION = 3
+
+const CONTENT_STORAGE_KEYS = [
+  'profile',
+  'services',
+  'projects',
+  'certifications',
+  'metrics',
+  'heroCopy',
+] as const
+
+// Runs once at module import — before BrandingProvider renders and before
+// any useState initializer reads localStorage — so a first load after a
+// deploy with stale saved state renders the new defaults.
+export function migrateStoredContentVersion(): void {
+  if (typeof window === 'undefined') return
+  try {
+    if (window.localStorage.getItem('contentVersion') === String(CONTENT_STORAGE_VERSION)) return
+    for (const key of CONTENT_STORAGE_KEYS) window.localStorage.removeItem(key)
+    window.localStorage.setItem('contentVersion', String(CONTENT_STORAGE_VERSION))
+  } catch {
+    // Storage unavailable (e.g. private mode) — initializers fall back to defaults.
+  }
+}
+
+migrateStoredContentVersion()
+
 
 export type VisualMode = 'flat' | 'neumorphic' | 'glassmorphic' | 'claymorphic'
 export type PersonaTone = 'executive' | 'technologist' | 'academic'
