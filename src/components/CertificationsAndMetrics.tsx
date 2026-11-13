@@ -80,9 +80,11 @@ export default function CertificationsAndMetrics() {
                   <div className="w-10 h-10 rounded-xl bg-gold-accent/10 border border-gold-accent/20 flex items-center justify-center text-gold-accent">
                     <LucideIcons.Award className="w-5 h-5" />
                   </div>
-                  <span className="text-[10px] font-bold uppercase tracking-widest bg-dark-navy-light text-muted-gray px-3 py-1 rounded-full border border-dark-navy/15">
-                    {cert.date}
-                  </span>
+                  {cert.date && (
+                    <span className="text-[10px] font-bold uppercase tracking-widest bg-dark-navy-light text-muted-gray px-3 py-1 rounded-full border border-dark-navy/15">
+                      {cert.date}
+                    </span>
+                  )}
                 </div>
 
                 <div className="space-y-2">
@@ -103,7 +105,7 @@ export default function CertificationsAndMetrics() {
                 <span>Authority: {cert.authority}</span>
                 <span className="text-gold-accent font-semibold flex items-center space-x-1">
                   <LucideIcons.Shield className="w-3.5 h-3.5 text-glow" />
-                  <span>Verified Security Badge</span>
+                  <span>Verified Credential</span>
                 </span>
               </div>
             </div>

@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useNavigate } from 'react-router-dom'
 import { Play, ArrowRight, X, Shield, Code, Award } from 'lucide-react'
 import { useBranding } from '../context/BrandingContext'
 
@@ -9,6 +10,7 @@ interface HeroProps {
 
 export default function HeroSection({ onWorkClick }: HeroProps) {
   const [showPitchDeck, setShowPitchDeck] = useState(false)
+  const navigate = useNavigate()
   const { profile, personaTone, visualMode, heroCopy } = useBranding()
 
   // Parse active copy
@@ -58,7 +60,7 @@ export default function HeroSection({ onWorkClick }: HeroProps) {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.1 }}
-            className="text-silver-text font-black text-4xl sm:text-5xl lg:text-6xl leading-[1.1] tracking-tight"
+            className="text-silver-text font-black text-4xl sm:text-5xl lg:text-6xl leading-[1.1] tracking-tight text-balance"
           >
             {currentCopy.title}
           </motion.h1>
@@ -250,13 +252,15 @@ export default function HeroSection({ onWorkClick }: HeroProps) {
                     </div>
                   </div>
                   
-                  <a
-                    href="#contact"
-                    onClick={() => setShowPitchDeck(false)}
-                    className="px-6 py-3 rounded-xl bg-gold-accent hover:bg-gold-hover text-[#111C33] font-extrabold text-sm uppercase tracking-wider transition-all duration-300"
+                  <button
+                    onClick={() => {
+                      setShowPitchDeck(false)
+                      navigate('/contact')
+                    }}
+                    className="px-6 py-3 rounded-xl bg-gold-accent hover:bg-gold-hover text-[#111C33] font-extrabold text-sm uppercase tracking-wider transition-all duration-300 cursor-pointer"
                   >
                     Discuss Partnership
-                  </a>
+                  </button>
                 </div>
               </div>
             </motion.div>

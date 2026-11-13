@@ -96,7 +96,7 @@ export default function AboutSection() {
               <div className="space-y-2">
                 <span className="text-gold-accent font-extrabold text-xs uppercase tracking-wider block">04 / ECOSYSTEM BACKGROUND</span>
                 <p className="text-muted-gray text-xs leading-relaxed font-light">
-                  Academic backing from UNILAK (BSc IT Networking), CMU-Africa Bridge Program, and AFRETEC Cybersecurity Certificate.
+                  BSc IT (Networking) from UNILAK, conferred October 2026; CMU-Africa Bridge Program graduate; AFRETEC Cybersecurity Certificate.
                 </p>
               </div>
             </div>

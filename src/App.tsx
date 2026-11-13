@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, lazy, Suspense } from 'react'
 import { BrowserRouter, Routes, Route, useLocation, useNavigate } from 'react-router-dom'
 import { AnimatePresence } from 'framer-motion'
 import { Lock, Sun, Moon, Send, Terminal } from 'lucide-react'
@@ -12,8 +12,11 @@ import ServicesSection from './components/ServicesSection'
 import FeaturedProjects from './components/FeaturedProjects'
 import CertificationsAndMetrics from './components/CertificationsAndMetrics'
 import ContactSection from './components/ContactSection'
-import AdminSection from './components/AdminSection'
 import CommandTerminal from './components/CommandTerminal'
+
+// Admin console is only needed on /admin, so it loads on demand and stays
+// out of the main bundle.
+const AdminSection = lazy(() => import('./components/AdminSection'))
 
 function AppContent() {
   const { theme, toggleTheme, visualMode, profile } = useBranding()
@@ -44,7 +47,7 @@ function AppContent() {
   const isAdminRoute = location.pathname === '/admin'
 
   return (
-    <div className={`relative min-h-screen bg-deep-obsidian text-silver-text flex flex-col lg:flex-row antialiased select-none selection:bg-gold-accent/30 selection:text-white visual-mode-${visualMode}`}>
+    <div className={`relative min-h-screen bg-deep-obsidian text-silver-text flex flex-col lg:flex-row antialiased selection:bg-gold-accent/30 selection:text-white visual-mode-${visualMode}`}>
       {/* 1. Global Ambient Mesh Lights & Digital Grid */}
       <BackgroundGlow />
 
@@ -107,7 +110,7 @@ function AppContent() {
               <Route path="/portfolio" element={<FeaturedProjects />} />
               <Route path="/certifications" element={<CertificationsAndMetrics />} />
               <Route path="/contact" element={<ContactSection />} />
-              <Route path="/admin" element={<AdminSection />} />
+              <Route path="/admin" element={<Suspense fallback={<div className="flex flex-grow items-center justify-center py-20 text-muted-gray text-sm">Loading admin console…</div>}><AdminSection /></Suspense>} />
             </Routes>
           </AnimatePresence>
         </div>

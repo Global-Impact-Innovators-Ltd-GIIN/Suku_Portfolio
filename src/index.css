@@ -30,6 +30,11 @@
   /* Shadow colors for Neumorphism & Claymorphism */
   --shadow-dark: rgba(0, 0, 0, 0.5);
   --shadow-light: rgba(255, 255, 255, 0.05);
+
+  /* Glow alphas (also defined for light mode below — dark mode needs them too) */
+  --shadow-gold-alpha: 0.08;
+  --shadow-gold-alpha-hover: 0.16;
+  --shadow-navy-alpha: 0.10;
   
   /* Glassmorphism settings */
   --card-bg-rgb: 41, 41, 41;
@@ -125,6 +130,17 @@
 @layer base {
   :root {
     --font-sans: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+  }
+
+  /* Keep display headings from leaving lone words on their own line */
+  h1, h2 {
+    text-wrap: balance;
+  }
+
+  /* Visible keyboard focus for links, buttons and form fields */
+  :focus-visible {
+    outline: 2px solid var(--color-gold-accent);
+    outline-offset: 2px;
   }
 }
 

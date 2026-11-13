@@ -1,6 +1,5 @@
 /* eslint-disable react-refresh/only-export-components */
 import React, { createContext, useContext, useState, useEffect } from 'react'
-import { jsPDF } from 'jspdf'
 import { supabase } from '../supabaseClient'
 
 export type VisualMode = 'flat' | 'neumorphic' | 'glassmorphic' | 'claymorphic'
@@ -19,11 +18,15 @@ export interface ProjectItem {
   id: string
   title: string
   subtitle: string
-  category: 'dev' | 'cyber-net' | 'giin'
+  category: 'dev' | 'cyber-net' | 'venture' | 'content'
   tech: string[]
-  iconName: string // e.g. 'Eye', 'Shield', 'Cpu', 'Layout'
-  mockup: 'eye-tracking' | 'certificate-auth' | 'network-routing' | 'giin-portal'
+  iconName: string // e.g. 'Video', 'ShoppingBag', 'Clapperboard', 'BookOpen'
+  // 'showcase' renders the clean typographic/icon card. The older vector
+  // mockup values are kept for backwards compatibility with stored rows
+  // and also render as the showcase card.
+  mockup: 'showcase' | 'eye-tracking' | 'certificate-auth' | 'network-routing' | 'giin-portal'
   link: string
+  status?: string // e.g. 'Live', 'In build', 'In formation', 'Complete', 'In progress'
 }
 
 export interface CertItem {
@@ -200,8 +203,8 @@ export const DEFAULT_HERO_COPY: PersonaCopyMap = {
   technologist: {
     eyebrow: "HELLO, I'M SUKU",
     title: "Building Secure, Scalable, and Intelligent Digital Systems.",
-    description: "I am a Frontend Developer at UBWENGE LAB and the Founder & CEO of GIIN Ltd. Fusing robust UI engineering with enterprise security and networking infrastructure.",
-    badges: "UBWENGE LAB, React & TS, UNILAK IT, Cisco Routing, GIIN Ltd",
+    description: "I am a Frontend Developer at UBWENGE LAB and the Founder & CEO of GIIN Ltd in Kigali, Rwanda. I build secure, scalable systems — from live video platforms to marketplaces — and teach the next generation of network engineers.",
+    badges: "UBWENGE LAB, GiinMeet, React & Next.js, UNILAK IT, GIIN Ltd",
     card1Title: "Developer",
     card1Subtitle: "UBWENGE LAB",
     card2Title: "AFRETEC",
@@ -316,18 +319,18 @@ const DEFAULT_PROFILE: ProfileDetails = {
   company: 'Global Impact Innovators Ltd (GIIN)',
   email: 'mensahqsukujr@gmail.com',
   email2: 'globalimpactinnovatorsltd@gmail.com',
-  whatsappUrl: 'https://wa.me/233240000000', // default WhatsApp link or format
-  phone: '+250 788 000 000',
-  facebookUrl: 'https://facebook.com',
-  instagramUrl: 'https://instagram.com',
-  tiktokUrl: 'https://tiktok.com',
+  whatsappUrl: 'https://wa.me/250798655345',
+  phone: '+250 798 655 345',
+  facebookUrl: '',
+  instagramUrl: '',
+  tiktokUrl: 'https://www.tiktok.com/@kitothesage',
   location: 'Kigali, Rwanda',
   cvPath: '/Mensah_Suku_CV.pdf',
-  linkedinUrl: 'https://linkedin.com',
+  linkedinUrl: 'https://www.linkedin.com/in/mensah-q-suku-jr-4ba086292',
   githubUrl: 'https://github.com/nimdaukus',
   githubUrl2: 'https://github.com/Global-Impact-Innovators-Ltd-GIIN',
-  githubUrl3: 'https://github.com',
-  githubUrl4: 'https://github.com',
+  githubUrl3: '',
+  githubUrl4: '',
   profileImage: '/profile.png',
   logoImage: ''
 }
@@ -360,96 +363,145 @@ const DEFAULT_SERVICES: ServiceItem[] = [
     description: 'Providing IT consultancy, corporate portal implementations, business automation, and digital scaling blueprints via Global Impact Innovators Ltd (GIIN).',
     iconName: 'Zap',
     badge: 'GIIN Innovation'
+  },
+  {
+    id: 's5',
+    title: 'Technical Teaching & Mentorship',
+    description: 'Teaching networking and Windows Server administration to senior-high (S4–S6) students in Kigali — 46 video lessons across 23 modules, built on a hands-on VMware lab.',
+    iconName: 'GraduationCap',
+    badge: '46 Lessons'
   }
 ]
 
 const DEFAULT_PROJECTS: ProjectItem[] = [
   {
     id: 'p1',
-    title: 'AI Eye Tracking Examination Monitoring',
-    subtitle: 'Computer Vision invigilation system detecting pupil movements and facial landmarks.',
+    title: 'GiinMeet',
+    subtitle: 'Live video meeting platform for teams — waiting room and passcodes, host controls, end-for-all, screen share, hand raise, polls, whiteboard and attendance.',
     category: 'dev',
-    tech: ['Flask', 'OpenCV', 'MediaPipe', 'SQLite'],
-    iconName: 'Eye',
-    mockup: 'eye-tracking',
-    link: 'https://github.com'
+    tech: ['Next.js 16', 'LiveKit', 'Supabase', 'TypeScript'],
+    iconName: 'Video',
+    mockup: 'showcase',
+    link: 'https://giinmeet.nimdaukus.com',
+    status: 'Live'
   },
   {
     id: 'p2',
-    title: 'Academic Certificate Authentication',
-    subtitle: 'Cryptographic registration and digital steganography for certificate anti-forgery.',
-    category: 'cyber-net',
-    tech: ['Python', 'Steganography', 'AES-256', 'Crypto'],
-    iconName: 'Shield',
-    mockup: 'certificate-auth',
-    link: 'https://github.com'
+    title: 'eWaterside',
+    subtitle: 'Multi-vendor marketplace for Liberia and the first pilot venture of Melloon. Suku is building the backend; launch targeted for early February 2027.',
+    category: 'venture',
+    tech: ['NestJS', 'PostgreSQL', 'Prisma', 'Redis'],
+    iconName: 'ShoppingBag',
+    mockup: 'showcase',
+    link: '',
+    status: 'In build'
   },
   {
     id: 'p3',
-    title: 'Smart City Network Architecture',
-    subtitle: 'Centralized network layout with intelligent routing nodes, SIEM filters, and failovers.',
-    category: 'cyber-net',
-    tech: ['Cisco Packet Tracer', 'SIEM', 'IPSec VPN', 'Subnetting'],
-    iconName: 'Cpu',
-    mockup: 'network-routing',
-    link: 'https://github.com'
+    title: 'Melloon',
+    subtitle: 'Kigali holding company Suku co-founded as CEO — fintech and payments, housing, biometrics and ID, ed-tech and government digital solutions. In formation.',
+    category: 'venture',
+    tech: ['Fintech', 'Biometrics & ID', 'Ed-tech', 'GovTech'],
+    iconName: 'Building2',
+    mockup: 'showcase',
+    link: '',
+    status: 'In formation'
   },
   {
     id: 'p4',
-    title: 'GIIN Digital Corporate Ecosystem',
-    subtitle: 'Enterprise corporate portal, microfinance loan engine, and CRM tools for GIIN clients.',
-    category: 'giin',
-    tech: ['React.js', 'Node.js', 'PostgreSQL', 'Tailwind'],
-    iconName: 'Layout',
-    mockup: 'giin-portal',
-    link: 'https://github.com'
+    title: 'Windows Server Administration Course',
+    subtitle: '46 video lessons teaching Windows Server administration to S4–S6 networking students in Kigali — 23 modules each in 2025 and 2008 modes.',
+    category: 'cyber-net',
+    tech: ['Windows Server 2025', 'Windows Server 2008', 'VMware', 'Active Directory'],
+    iconName: 'GraduationCap',
+    mockup: 'showcase',
+    link: '',
+    status: 'Complete'
+  },
+  {
+    id: 'p5',
+    title: 'Kito — The Sage',
+    subtitle: 'Daily stickman science explainers on TikTok — six short videos a day, each answering one curious question about life, science and how things work.',
+    category: 'content',
+    tech: ['TikTok', 'Short-form video', 'Storytelling'],
+    iconName: 'Lightbulb',
+    mockup: 'showcase',
+    link: 'https://www.tiktok.com/@kitothesage',
+    status: 'Live'
+  },
+  {
+    id: 'p6',
+    title: 'UKUS Studio',
+    subtitle: 'African short dramas on TikTok. Episode 1, “The Hidden Banker”, is live now — a night guard mocked by his own bank’s staff turns out to own the bank.',
+    category: 'content',
+    tech: ['TikTok', 'Short drama', 'Storytelling'],
+    iconName: 'Clapperboard',
+    mockup: 'showcase',
+    link: 'https://www.tiktok.com/@ukusstudio',
+    status: 'Live'
+  },
+  {
+    id: 'p7',
+    title: 'The Sovereign Mind',
+    subtitle: 'Suku’s book in progress on metacognition — escaping inherited beliefs through the power of thinking about thinking. Chapters 11–13 and the Epilogue are written.',
+    category: 'content',
+    tech: ['Non-fiction', 'Metacognition', 'Writing'],
+    iconName: 'BookOpen',
+    mockup: 'showcase',
+    link: '',
+    status: 'In progress'
   }
 ]
 
 const DEFAULT_CERTS: CertItem[] = [
   {
     id: 'c1',
+    title: 'BSc in Information Technology – Networking',
+    issuer: 'UNILAK (University of Lay Adventists of Kigali)',
+    details: '75.60/100, Second Class Upper. Degree conferred 31 October 2026. Specialisation in enterprise routing and switching, systems architecture and security.',
+    date: 'Oct 2026',
+    authority: 'UNILAK'
+  },
+  {
+    id: 'c2',
     title: 'Professional Certificate in Cybersecurity',
     issuer: 'AFRETEC (African Network for Education in Science and Technology)',
-    details: 'Comprehensive security analytics, cryptography, endpoint protection, infrastructure audits, and risk vectors.',
-    date: '2025',
+    details: 'Certificate of Participation. Security analytics, cryptography, endpoint protection, infrastructure audits and risk vectors.',
+    date: 'Jan 2026',
     authority: 'AFRETEC Network',
     imageUrl: '/cyber_cert_doc.png'
   },
   {
-    id: 'c2',
+    id: 'c3',
     title: 'CMU-Africa Bridge Program Graduate',
     issuer: 'Carnegie Mellon University Africa',
-    details: 'Advanced engineering paradigms, computing models, systems, and professional technology translation.',
-    date: '2024',
-    authority: 'CMU-Africa',
-    imageUrl: '/cyber_cert_doc.png'
-  },
-  {
-    id: 'c3',
-    title: 'BSc in Information Technology – Networking',
-    issuer: 'UNILAK (University of Lay Adventists of Kigali)',
-    details: 'Final-year specialization in enterprise routing/switching, system architecture, database administration, and security.',
-    date: 'Expected 2026',
-    authority: 'UNILAK IT Dept',
-    imageUrl: '/cyber_cert_doc.png'
+    details: 'Advanced engineering paradigms, computing models, systems and professional technology translation.',
+    date: '2026',
+    authority: 'CMU-Africa'
   },
   {
     id: 'c4',
-    title: 'Leadership & Entrepreneurship Track',
-    issuer: 'Global Impact Innovators Ltd. (GIIN)',
-    details: 'Strategic leadership, venture creation, African digital ecosystem deployment, and technology project consulting.',
-    date: 'Current',
-    authority: 'GIIN Leadership',
-    imageUrl: '/cyber_cert_doc.png'
+    title: 'Cisco Networking Essentials',
+    issuer: 'Cisco Networking Academy',
+    details: 'Routing and switching fundamentals, network configuration and troubleshooting.',
+    date: '',
+    authority: 'Cisco'
+  },
+  {
+    id: 'c5',
+    title: 'Duolingo English Test — Overall 125',
+    issuer: 'Duolingo',
+    details: 'English proficiency certified: Speaking 135, Writing 115, Reading 125, Listening 115.',
+    date: 'Feb 2026',
+    authority: 'Duolingo'
   }
 ]
 
 const DEFAULT_METRICS: MetricItem[] = [
-  { id: 'm1', value: '80+', label: 'GIIN Clients Served', iconName: 'Users' },
-  { id: 'm2', value: '4+', label: 'Core Tech Domains', iconName: 'Compass' },
-  { id: 'm3', value: '100%', label: 'Cybersecurity Compliant', iconName: 'Shield' },
-  { id: 'm4', value: 'CMU', label: 'Africa Alumnus Track', iconName: 'BookOpen' }
+  { id: 'm1', value: '46', label: 'Video lessons produced', iconName: 'Play' },
+  { id: 'm2', value: '2', label: 'Companies founded', iconName: 'Building2' },
+  { id: 'm3', value: '6', label: 'Explainers a day', iconName: 'Clapperboard' },
+  { id: 'm4', value: '23', label: 'Course modules built', iconName: 'BookOpen' }
 ]
 
 export const BrandingProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -965,7 +1017,7 @@ export const BrandingProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     applyPreset(COLOR_PRESETS[0]) // 8Bees Premium
   }
 
-  const downloadCV = (format: 'pdf' | 'word' | 'png') => {
+  const downloadCV = async (format: 'pdf' | 'word' | 'png') => {
     if (format === 'word') {
       const activeCopy = heroCopy[personaTone] || heroCopy.technologist
       const docContent = `
@@ -987,7 +1039,7 @@ export const BrandingProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           <h1>${profile.name.toUpperCase()}</h1>
           <div class="subtitle">${profile.role} - ${profile.company}</div>
           <div class="contact-info">
-            📍 Location: ${profile.location} | 📧 Primary Email: ${profile.email} ${profile.email2 ? `| 📧 Secondary Email: ${profile.email2}` : ''} | 📞 Phone: ${profile.phone || '+250 788 000 000'}
+            📍 Location: ${profile.location} | 📧 Primary Email: ${profile.email} ${profile.email2 ? `| 📧 Secondary Email: ${profile.email2}` : ''} | 📞 Phone: ${profile.phone || '+250 798 655 345'}
           </div>
           
           <h2>PROFESSIONAL SUMMARY</h2>
@@ -1064,9 +1116,9 @@ export const BrandingProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     if (profile.email2) {
       ctx.fillText(`📧 ${profile.email2}`, 40, 320)
     }
-    ctx.fillText(`📞 ${profile.phone || '+250 788 000 000'}`, 40, 350)
+    ctx.fillText(`📞 ${profile.phone || '+250 798 655 345'}`, 40, 350)
     ctx.fillText(`📍 ${profile.location}`, 40, 380)
-    ctx.fillText(`🔗 linkedin.com/in/mensah-suku`, 40, 410)
+    ctx.fillText(`🔗 linkedin.com/in/mensah-q-suku-jr-4ba086292`, 40, 410)
 
     // Skills Section
     ctx.fillStyle = '#292929'
@@ -1076,12 +1128,12 @@ export const BrandingProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     ctx.fillRect(40, 490, 340, 3)
 
     const skillList = [
-      'React / TypeScript',
+      'React / TypeScript / Next.js',
+      'NestJS & Prisma APIs',
       'Cybersecurity Auditing',
       'Cisco Network Routing',
-      'Steganographic Coding',
-      'IT Venture Strategy',
-      'Vite & Responsive UX/UI'
+      'Windows Server Administration',
+      'IT Venture Strategy'
     ]
     ctx.fillStyle = '#555555'
     ctx.font = '13px sans-serif'
@@ -1097,8 +1149,7 @@ export const BrandingProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     ctx.fillRect(40, 760, 340, 3)
     ctx.fillStyle = '#555555'
     ctx.font = '14px sans-serif'
-    ctx.fillText('• English (Professional)', 40, 800)
-    ctx.fillText('• French (Conversational)', 40, 835)
+    ctx.fillText('• English (Fluent)', 40, 800)
 
     // Right Column content
     ctx.fillStyle = '#292929'
@@ -1182,6 +1233,8 @@ export const BrandingProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     ctx.restore()
 
     if (format === 'pdf') {
+      // jsPDF is loaded on demand so the main bundle stays lean.
+      const { jsPDF } = await import('jspdf')
       const imgData = canvas.toDataURL('image/png')
       const pdf = new jsPDF({
         orientation: 'portrait',

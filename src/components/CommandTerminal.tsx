@@ -58,7 +58,7 @@ export default function CommandTerminal({ isOpen, onClose }: CommandTerminalProp
           `Operator Identity: ${profile.name}`,
           `Role: ${profile.role} // CEO of ${profile.company}`,
           `Scope: Frontend Dev, Cisco Networking, Cybersecurity Analytics`,
-          `Status: ACTIVE // AFRETEC Certified`
+          `Status: ACTIVE // AFRETEC Cybersecurity`
         ]
         break
       case 'skills':
@@ -66,7 +66,7 @@ export default function CommandTerminal({ isOpen, onClose }: CommandTerminalProp
           'Operator Competency Matrix:',
           '  [x] React / TypeScript      - Enterprise Frontend Engineering',
           '  [x] Cybersecurity Auditing  - Network vulnerability scanning',
-          '  [x] Routing & Switching     - Cisco CCNA certified engineering',
+          '  [x] Routing & Switching     - Cisco Networking Essentials',
           '  [x] Steganographic Hashing   - Image payload diagnostics',
           '  [x] Tailwind CSS & UX/UI   - High-fidelity visual styling'
         ]

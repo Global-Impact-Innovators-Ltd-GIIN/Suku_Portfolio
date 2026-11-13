@@ -64,7 +64,7 @@ export default function SkillsSection() {
             Skillsets & Core Matrices
           </h2>
           <p className="text-muted-gray max-w-xl text-sm leading-relaxed font-light">
-            Measured proficiency ratings based on projects shipped, certifications earned, and years of hands-on deployment.
+            Self-assessed strengths across the four areas I work in every day.
           </p>
         </div>
 

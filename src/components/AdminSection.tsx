@@ -110,7 +110,7 @@ export default function AdminSection() {
 
   // List editor states
   const [newService, setNewService] = useState({ title: '', description: '', iconName: 'Code', badge: '' })
-  const [newProject, setNewProject] = useState({ title: '', subtitle: '', category: 'dev' as any, tech: '', mockup: 'eye-tracking' as any, link: '', iconName: 'Cpu' })
+  const [newProject, setNewProject] = useState({ title: '', subtitle: '', category: 'dev' as any, tech: '', mockup: 'showcase' as any, link: '', iconName: 'Cpu' })
   const [newCert, setNewCert] = useState({ title: '', issuer: '', details: '', date: '', authority: '', imageUrl: '' })
 
   const profilePicInput = useRef<HTMLInputElement>(null)
@@ -205,7 +205,7 @@ export default function AdminSection() {
       tech: newProject.tech.split(',').map(t => t.trim()).filter(Boolean)
     }
     setProjects([...projects, item])
-    setNewProject({ title: '', subtitle: '', category: 'dev', tech: '', mockup: 'eye-tracking', link: '', iconName: 'Cpu' })
+    setNewProject({ title: '', subtitle: '', category: 'dev', tech: '', mockup: 'showcase', link: '', iconName: 'Cpu' })
     showSuccess('Project added successfully!')
   }
 
@@ -1284,17 +1284,15 @@ export default function AdminSection() {
                         <select value={newProject.category} onChange={(e) => setNewProject({ ...newProject, category: e.target.value as any })} className="w-full px-3 py-2 bg-obsidian border border-dark-navy/40 rounded-lg text-xs outline-none text-silver-text">
                           <option value="dev">Software Development</option>
                           <option value="cyber-net">Cyber & Networking</option>
-                          <option value="giin">GIIN Venture Ecosystem</option>
+                          <option value="venture">Ventures</option>
+                          <option value="content">Content & Media</option>
                         </select>
                       </div>
 
                       <div className="space-y-1">
                         <label className="text-muted-gray text-[9px] uppercase font-bold pl-1">Vector Mockup Frame</label>
                         <select value={newProject.mockup} onChange={(e) => setNewProject({ ...newProject, mockup: e.target.value as any })} className="w-full px-3 py-2 bg-obsidian border border-dark-navy/40 rounded-lg text-xs outline-none text-silver-text">
-                          <option value="eye-tracking">Eye Tracking Monitoring</option>
-                          <option value="certificate-auth">Certificate Authenticator</option>
-                          <option value="network-routing">Smart Network Topography</option>
-                          <option value="giin-portal">GIIN Digital Platform</option>
+                          <option value="showcase">Showcase Card (icon + status)</option>
                         </select>
                       </div>
 
@@ -1328,7 +1326,7 @@ export default function AdminSection() {
                     <form onSubmit={handleAddCert} className="grid grid-cols-1 sm:grid-cols-4 gap-4 items-end bg-obsidian/30 p-4 border border-dark-navy/20 rounded-2xl">
                       <div className="sm:col-span-2 space-y-1">
                         <label className="text-muted-gray text-[9px] uppercase font-bold pl-1">Credential Name</label>
-                        <input type="text" placeholder="e.g. Cisco CCNA Routing" value={newCert.title} onChange={(e) => setNewCert({ ...newCert, title: e.target.value })} className="w-full px-3 py-2 bg-obsidian border border-dark-navy/40 rounded-lg text-xs outline-none text-silver-text" />
+                        <input type="text" placeholder="e.g. Cisco Networking Essentials" value={newCert.title} onChange={(e) => setNewCert({ ...newCert, title: e.target.value })} className="w-full px-3 py-2 bg-obsidian border border-dark-navy/40 rounded-lg text-xs outline-none text-silver-text" />
                       </div>
                       <div className="space-y-1">
                         <label className="text-muted-gray text-[9px] uppercase font-bold pl-1">Issuer</label>
@@ -1562,7 +1560,8 @@ CREATE TABLE IF NOT EXISTS projects (
   tech TEXT[],
   iconName TEXT,
   mockup TEXT,
-  link TEXT
+  link TEXT,
+  status TEXT
 );
 
 -- 4. Certifications Table
