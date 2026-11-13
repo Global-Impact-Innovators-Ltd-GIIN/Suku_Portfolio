@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ArrowRight, ExternalLink } from 'lucide-react'
+import { ArrowRight, ExternalLink, Lock } from 'lucide-react'
 import * as LucideIcons from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { GithubIcon } from './Icons'
@@ -192,6 +192,51 @@ export default function FeaturedProjects() {
                       {project.subtitle}
                     </p>
                   </div>
+
+                  {/* Locked source-code row (Flutterwave gate).
+                      The repo URL is never stored or rendered — only the
+                      Flutterwave payment link Suku configures in the admin
+                      console. Until that link is set, the locked state shows. */}
+                  {project.repoGated && project.repoName && (
+                    <div className="rounded-xl border border-gold-accent/25 bg-gold-accent/5 p-4 space-y-2">
+                      <div className="flex items-center justify-between gap-3">
+                        <p className="inline-flex items-center space-x-1.5 text-xs font-bold text-silver-text">
+                          <Lock className="w-3.5 h-3.5 text-gold-accent" />
+                          <span>Source code: {project.repoName}</span>
+                        </p>
+                        {project.repoPrice && (
+                          <span className="shrink-0 text-xs font-extrabold text-gold-accent">
+                            {project.repoPrice}
+                          </span>
+                        )}
+                      </div>
+                      {project.repoDescription && (
+                        <p className="text-muted-gray text-xs leading-relaxed font-light">
+                          {project.repoDescription}
+                        </p>
+                      )}
+                      {project.repoPaymentLink ? (
+                        <a
+                          href={project.repoPaymentLink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center space-x-1.5 px-4 py-2 rounded-xl bg-gold-accent hover:bg-gold-hover text-[#111C33] font-extrabold text-xs uppercase tracking-wider transition-all duration-300 shadow-gold-glow"
+                        >
+                          <Lock className="w-3.5 h-3.5" />
+                          <span>Unlock source access</span>
+                        </a>
+                      ) : (
+                        <p className="text-muted-gray text-xs leading-relaxed font-light">
+                          Payment setup in progress — source access opens soon. Contact Suku to enquire.
+                        </p>
+                      )}
+                      {project.repoPaymentLink && (
+                        <p className="text-muted-gray text-[11px] leading-relaxed font-light">
+                          Pay securely with Flutterwave — the source link is shared with you after payment is confirmed.
+                        </p>
+                      )}
+                    </div>
+                  )}
 
                   {/* Actions Links */}
                   <div className="pt-4 border-t border-dark-navy/30 flex items-center justify-between gap-3">

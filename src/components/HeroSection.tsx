@@ -10,8 +10,12 @@ interface HeroProps {
 
 export default function HeroSection({ onWorkClick }: HeroProps) {
   const [showPitchDeck, setShowPitchDeck] = useState(false)
+  const [imgError, setImgError] = useState(false)
   const navigate = useNavigate()
-  const { profile, personaTone, visualMode, heroCopy } = useBranding()
+  const { profile, personaTone, visualMode, heroCopy, projects } = useBranding()
+
+  // "Currently building" strip — live project data only, no invented text.
+  const currentlyBuilding = projects.filter(p => p.title === 'eWaterside' || p.title === 'GiinMeet')
 
   // Parse active copy
   const activeCopy = heroCopy[personaTone] || heroCopy.technologist
@@ -43,6 +47,19 @@ export default function HeroSection({ onWorkClick }: HeroProps) {
         
         {/* Left Side Content Column (7 cols on desktop) */}
         <div className="lg:col-span-7 flex flex-col text-left space-y-6">
+          <motion.div
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+          >
+            <span className="inline-flex items-center space-x-2 px-3 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-wider bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" />
+              </span>
+              <span>Open to new opportunities</span>
+            </span>
+          </motion.div>
           <motion.div
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
@@ -136,11 +153,20 @@ export default function HeroSection({ onWorkClick }: HeroProps) {
             {/* Custom Designed Container linked to visualMode */}
             <div className={`w-full h-full p-2 shadow-navy-glow group hover:border-gold-accent/50 transition-all duration-500 card-style ${visualMode}`}>
               <div className="relative w-full h-full rounded-[24px] overflow-hidden bg-obsidian">
-                <img
-                  src={profile.profileImage}
-                  alt={profile.name}
-                  className="w-full h-full object-cover grayscale-[20%] group-hover:grayscale-0 group-hover:scale-105 transition-all duration-700"
-                />
+                {imgError ? (
+                  <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-dark-navy to-obsidian">
+                    <span className="font-sans font-black text-7xl text-gold-accent">
+                      {profile.initials || 'M'}
+                    </span>
+                  </div>
+                ) : (
+                  <img
+                    src={profile.profileImage}
+                    alt={profile.name}
+                    onError={() => setImgError(true)}
+                    className="w-full h-full object-cover grayscale-[20%] group-hover:grayscale-0 group-hover:scale-105 transition-all duration-700"
+                  />
+                )}
                 
                 {/* Subtle Overlay to blend with UI colors */}
                 <div className="absolute inset-0 bg-gradient-to-t from-obsidian/60 via-transparent to-transparent opacity-60" />
@@ -182,6 +208,40 @@ export default function HeroSection({ onWorkClick }: HeroProps) {
         </div>
 
       </div>
+
+      {/* Currently building strip — live projects from useBranding(), no invented text */}
+      {currentlyBuilding.length > 0 && (
+        <div className="w-full max-w-6xl mt-14 pt-8 border-t border-dark-navy/35 text-left">
+          <p className="text-muted-gray text-[11px] font-bold uppercase tracking-widest mb-4">
+            Currently building
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {currentlyBuilding.map((project) => (
+              <button
+                key={project.id}
+                onClick={() => navigate('/portfolio')}
+                className={`p-5 text-left border border-dark-navy/40 hover:border-gold-accent/40 transition-all duration-300 cursor-pointer card-style ${visualMode}`}
+              >
+                <div className="flex items-center justify-between gap-3 mb-2">
+                  <span className="text-silver-text font-bold text-sm">{project.title}</span>
+                  <span
+                    className={`shrink-0 px-2.5 py-1 rounded-full text-[9px] font-bold uppercase tracking-wider border ${
+                      project.status === 'Live'
+                        ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30'
+                        : 'bg-gold-accent/15 text-gold-accent border-gold-accent/30'
+                    }`}
+                  >
+                    {project.status || 'Featured'}
+                  </span>
+                </div>
+                <p className="text-muted-gray text-xs leading-relaxed font-light">
+                  {project.subtitle}
+                </p>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Pitch Deck / Intro Modal Popup */}
       <AnimatePresence>

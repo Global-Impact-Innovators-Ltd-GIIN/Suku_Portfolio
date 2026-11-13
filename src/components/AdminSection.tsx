@@ -22,7 +22,8 @@ import {
   Mail
 } from 'lucide-react'
 import { useBranding, COLOR_PRESETS } from '../context/BrandingContext'
-import type { VisualMode, PersonaTone } from '../context/BrandingContext'
+import type { VisualMode, PersonaTone, ProjectItem } from '../context/BrandingContext'
+import { sha256Hex } from '../lib/sha256'
 
 export default function AdminSection() {
   const {
@@ -80,6 +81,9 @@ export default function AdminSection() {
   const [loginError, setLoginError] = useState('')
   const [isLoggingIn, setIsLoggingIn] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
+  const [newAdminPassword, setNewAdminPassword] = useState('')
+  const [confirmAdminPassword, setConfirmAdminPassword] = useState('')
+  const [passwordChangeError, setPasswordChangeError] = useState('')
 
   // Cybersecurity Audit Telemetry States
   const [isAuditing, setIsAuditing] = useState(false)
@@ -94,7 +98,7 @@ export default function AdminSection() {
     
     const steps = [
       { prg: 20, log: '[SCAN] Parsing global HSL custom property variables...' },
-      { prg: 40, log: '[SCAN] Securing credentials hash algorithm (AES_256)...' },
+      { prg: 40, log: '[SCAN] Verifying admin credential hash (SHA-256)...' },
       { prg: 65, log: '[SCAN] Steganographic portfolio asset watermarks... [OK]' },
       { prg: 85, log: '[SCAN] Verifying web container responsive break boundaries...' },
       { prg: 100, log: '[COMPLETE] AUDIT SUCCESS: 0 defects detected. Brand system is fully optimized.' }
@@ -119,6 +123,33 @@ export default function AdminSection() {
   const showSuccess = (msg: string) => {
     setSuccessMsg(msg)
     setTimeout(() => setSuccessMsg(''), 3000)
+  }
+
+  // Change the admin password: hash the new password (SHA-256) and store
+  // only the hash. The current password is never displayed or stored.
+  const handleChangeAdminPassword = async () => {
+    setPasswordChangeError('')
+    if (!newAdminPassword) {
+      setPasswordChangeError('Enter a new password.')
+      return
+    }
+    if (newAdminPassword.length < 8) {
+      setPasswordChangeError('New password must be at least 8 characters.')
+      return
+    }
+    if (newAdminPassword !== confirmAdminPassword) {
+      setPasswordChangeError('New passwords do not match.')
+      return
+    }
+    try {
+      const hash = await sha256Hex(newAdminPassword)
+      setAdminPassword(hash)
+      setNewAdminPassword('')
+      setConfirmAdminPassword('')
+      showSuccess('Admin password changed successfully!')
+    } catch {
+      setPasswordChangeError('Could not change the password in this browser.')
+    }
   }
 
   // Base64 file reader helpers
@@ -214,6 +245,14 @@ export default function AdminSection() {
     showSuccess('Project removed.')
   }
 
+  // Source Access (Flutterwave gate): update the payment link / price of a
+  // gated repo. Values persist through setProjects like any other project
+  // edit (localStorage + Supabase sync). No repo URL is stored anywhere —
+  // only the Flutterwave payment link Suku creates in his own dashboard.
+  const updateGatedRepo = (id: string, patch: Pick<ProjectItem, 'repoPaymentLink' | 'repoPrice'>) => {
+    setProjects(projects.map(p => (p.id === id ? { ...p, ...patch } : p)))
+  }
+
   // Certifications handlers
   const handleAddCert = (e: React.FormEvent) => {
     e.preventDefault()
@@ -230,21 +269,29 @@ export default function AdminSection() {
   }
 
   if (!isAuthenticated) {
-    const handleLoginSubmit = (e: React.FormEvent) => {
+    const handleLoginSubmit = async (e: React.FormEvent) => {
       e.preventDefault()
-      const isCorrect = (loginUser === adminUsername && loginPass === adminPassword) || 
-                        (loginUser === 'mensahqsukujr@gmail.com' && loginPass === 'mqsukuadmin')
-      if (isCorrect) {
-        setIsLoggingIn(true)
-        setLoginError('')
-        setTimeout(() => {
-          setIsAuthenticated(true)
+      setIsLoggingIn(true)
+      setLoginError('')
+      try {
+        // The stored credential is a SHA-256 hash; compare hashes only.
+        // No hardcoded fallback credentials exist.
+        const inputHash = await sha256Hex(loginPass)
+        const isCorrect = loginUser === adminUsername && inputHash === adminPassword
+        if (isCorrect) {
+          setTimeout(() => {
+            setIsAuthenticated(true)
+            setIsLoggingIn(false)
+            setLoginUser('')
+            setLoginPass('')
+          }, 1200)
+        } else {
           setIsLoggingIn(false)
-          setLoginUser('')
-          setLoginPass('')
-        }, 1200)
-      } else {
-        setLoginError('Access Denied: Invalid administrator credentials.')
+          setLoginError('Access Denied: Invalid administrator credentials.')
+        }
+      } catch {
+        setIsLoggingIn(false)
+        setLoginError('Access Denied: Could not verify credentials in this browser.')
       }
     }
 
@@ -285,12 +332,12 @@ export default function AdminSection() {
                 <span className="text-emerald-400 font-bold">READY</span>
               </div>
               <div className="flex justify-between border-b border-dark-navy/20 pb-1">
-                <span>ENCRYPTION VECTOR:</span>
-                <span className="text-gold-accent font-bold font-sans">AES_256_GCM</span>
+                <span>CREDENTIAL HASH:</span>
+                <span className="text-gold-accent font-bold font-sans">SHA-256</span>
               </div>
               <div className="flex justify-between border-b border-dark-navy/20 pb-1">
-                <span>GATEWAY PORT:</span>
-                <span className="text-gold-accent font-semibold font-sans">5174 // SSL</span>
+                <span>TRANSPORT:</span>
+                <span className="text-gold-accent font-semibold font-sans">HTTPS</span>
               </div>
               <div className="flex justify-between">
                 <span>AUTHORIZED KEY:</span>
@@ -372,7 +419,7 @@ export default function AdminSection() {
                 className="w-full py-3.5 rounded-xl bg-gold-accent hover:bg-gold-hover text-[#111C33] font-extrabold text-sm uppercase tracking-widest flex items-center justify-center space-x-2 transition-all duration-300 shadow-gold-glow hover:shadow-gold-glow-hover cursor-pointer disabled:opacity-50"
               >
                 {isLoggingIn ? (
-                  <span>Decrypting Session...</span>
+                  <span>Verifying...</span>
                 ) : (
                   <>
                     <Unlock className="w-4 h-4" />
@@ -826,11 +873,11 @@ export default function AdminSection() {
 
                     {/* Logo Image */}
                     <div className="space-y-2">
-                      <label className="text-muted-gray text-xs uppercase font-bold tracking-wider block">Monogram Logo (Custom Image Over Initials)</label>
+                      <label className="text-muted-gray text-xs uppercase font-bold tracking-wider block">Site Logo (Custom Image Over Initials)</label>
                       <div className="flex items-center space-x-4 p-4 bg-obsidian/40 border border-dark-navy/20 rounded-2xl">
-                        <div className="w-16 h-16 rounded-xl overflow-hidden bg-obsidian border border-dark-navy flex-shrink-0 flex items-center justify-center">
+                        <div className="w-16 h-16 rounded-xl overflow-hidden bg-[#011C63] border border-dark-navy flex-shrink-0 flex items-center justify-center">
                           {profile.logoImage ? (
-                            <img src={profile.logoImage} alt="Logo preview" className="w-full h-full object-cover" />
+                            <img src={profile.logoImage} alt="Logo preview" className="w-full h-full object-contain" />
                           ) : (
                             <span className="text-silver-text font-black text-xl">{profile.initials}</span>
                           )}
@@ -1318,6 +1365,59 @@ export default function AdminSection() {
                     </div>
                   </div>
 
+                  {/* SOURCE ACCESS — FLUTTERWAVE (gated repos) */}
+                  {/* The project editor above is add/delete only, so gated
+                      repos get this dedicated section. Only the Flutterwave
+                      payment link and the price are editable here; the repo
+                      URL itself is never stored — it is shared with the
+                      buyer only after payment is confirmed. */}
+                  <div className="space-y-4">
+                    <h3 className="text-silver-text font-bold text-lg border-b border-dark-navy/40 pb-2">Source Access — Flutterwave</h3>
+                    <p className="text-muted-gray text-xs leading-relaxed font-light">
+                      Gated source code is unlocked by payment, not by a public link. Paste the Flutterwave payment link Suku creates in his Flutterwave for Business dashboard for each gated repo, and the price he sets. Leave both blank until set — with no payment link the site shows “Payment setup in progress”.
+                    </p>
+                    {projects.filter(p => p.repoGated).length === 0 ? (
+                      <p className="text-muted-gray text-xs font-light">No gated repos yet.</p>
+                    ) : (
+                      <div className="space-y-3">
+                        {projects.filter(p => p.repoGated).map(p => (
+                          <div key={p.id} className="p-4 bg-obsidian/40 border border-dark-navy/20 rounded-2xl space-y-3">
+                            <div>
+                              <span className="text-xs font-bold text-silver-text block">
+                                {p.title}{p.repoName && p.repoName !== p.title ? ` — ${p.repoName}` : ''}
+                              </span>
+                              {p.repoDescription && (
+                                <span className="text-[10px] text-muted-gray">{p.repoDescription}</span>
+                              )}
+                            </div>
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                              <div className="sm:col-span-2 space-y-1">
+                                <label className="text-muted-gray text-[9px] uppercase font-bold pl-1">Flutterwave payment link</label>
+                                <input
+                                  type="url"
+                                  placeholder="https://flutterwave.com/pay/…"
+                                  value={p.repoPaymentLink || ''}
+                                  onChange={(e) => updateGatedRepo(p.id, { repoPaymentLink: e.target.value })}
+                                  className="w-full px-3 py-2 bg-obsidian border border-dark-navy/40 rounded-lg text-xs outline-none text-silver-text"
+                                />
+                              </div>
+                              <div className="space-y-1">
+                                <label className="text-muted-gray text-[9px] uppercase font-bold pl-1">Price (e.g. $25 — leave blank until set)</label>
+                                <input
+                                  type="text"
+                                  placeholder="$25"
+                                  value={p.repoPrice || ''}
+                                  onChange={(e) => updateGatedRepo(p.id, { repoPrice: e.target.value })}
+                                  className="w-full px-3 py-2 bg-obsidian border border-dark-navy/40 rounded-lg text-xs outline-none text-silver-text"
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
                   {/* CERTIFICATIONS LISTS EDITOR */}
                   <div className="space-y-4">
                     <h3 className="text-silver-text font-bold text-lg border-b border-dark-navy/40 pb-2">Modify Credentials & Education</h3>
@@ -1412,18 +1512,38 @@ export default function AdminSection() {
                     </div>
 
                     <div className="space-y-1.5">
-                      <label className="text-muted-gray text-xs uppercase font-bold tracking-wider pl-1">Admin Password</label>
-                      <input 
-                        type="password" 
-                        value={adminPassword} 
-                        onChange={(e) => setAdminPassword(e.target.value)} 
+                      <label className="text-muted-gray text-xs uppercase font-bold tracking-wider pl-1">Change Admin Password</label>
+                      <input
+                        type="password"
+                        value={newAdminPassword}
+                        onChange={(e) => setNewAdminPassword(e.target.value)}
+                        placeholder="New password (min. 8 characters)"
+                        autoComplete="new-password"
                         className="w-full px-4 py-2.5 bg-obsidian border border-dark-navy/40 rounded-xl text-sm outline-none text-silver-text focus:border-gold-accent"
                       />
+                      <input
+                        type="password"
+                        value={confirmAdminPassword}
+                        onChange={(e) => setConfirmAdminPassword(e.target.value)}
+                        placeholder="Confirm new password"
+                        autoComplete="new-password"
+                        className="w-full px-4 py-2.5 bg-obsidian border border-dark-navy/40 rounded-xl text-sm outline-none text-silver-text focus:border-gold-accent"
+                      />
+                      <button
+                        type="button"
+                        onClick={handleChangeAdminPassword}
+                        className="px-4 py-2 bg-gold-accent text-obsidian text-xs font-bold uppercase tracking-wider rounded-xl hover:opacity-90"
+                      >
+                        Change Password
+                      </button>
+                      {passwordChangeError && (
+                        <p className="text-red-400 text-xs pl-1">{passwordChangeError}</p>
+                      )}
                     </div>
                   </div>
                   
                   <div className="p-4 bg-gold-accent/5 border border-gold-accent/20 rounded-xl text-xs text-muted-gray leading-relaxed font-light text-left">
-                    🔑 **Session Security**: Keep these credentials safe. The password is encrypted in browser storage and is used to decrypt access to this control panel.
+                    🔑 **Session Security**: Keep these credentials safe. The password is stored only as a SHA-256 hash in this browser's local storage — never as plain text. This is a local gate for this browser only, not server-side authentication.
                   </div>
                 </div>
               )}

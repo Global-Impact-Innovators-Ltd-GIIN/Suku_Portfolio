@@ -97,6 +97,17 @@ export default function CertificationsAndMetrics() {
                   <p className="text-muted-gray text-xs leading-relaxed font-light">
                     {cert.details}
                   </p>
+                  {cert.link && (
+                    <a
+                      href={cert.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center space-x-1.5 text-xs font-bold text-gold-accent hover:text-gold-light transition-colors duration-300"
+                    >
+                      <LucideIcons.ExternalLink className="w-3.5 h-3.5" />
+                      <span>View certificate (PDF)</span>
+                    </a>
+                  )}
                 </div>
               </div>
 

@@ -13,10 +13,13 @@ import {
   X,
   Sun,
   Moon,
-  Settings
+  Settings,
+  Lock
 } from 'lucide-react'
 import { GithubIcon, LinkedinIcon, WhatsappIcon, FacebookIcon, InstagramIcon, TiktokIcon } from './Icons'
 import { useBranding } from '../context/BrandingContext'
+import { CV_VARIANTS } from '../data/cvVariants'
+import type { CVVariantId } from '../data/cvVariants'
 
 interface SidebarProps {
   activeSection: string;
@@ -26,7 +29,10 @@ interface SidebarProps {
 export default function SidebarNavigation({ activeSection, onNavClick }: SidebarProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [showFormatPicker, setShowFormatPicker] = useState(false)
+  const [selectedVariant, setSelectedVariant] = useState<CVVariantId>('executive')
   const { theme, toggleTheme, visualMode, profile, downloadCV } = useBranding()
+
+  const selectedVariantMeta = CV_VARIANTS.find(v => v.id === selectedVariant) ?? CV_VARIANTS[0]
 
   const navItems = [
     { id: 'home', label: 'Home', icon: Home },
@@ -49,29 +55,32 @@ export default function SidebarNavigation({ activeSection, onNavClick }: Sidebar
       {/* Top Branding Section */}
       <div>
         <div className="flex items-center space-x-3 mb-8">
-          {/* Custom Logo Monogram / Image */}
-          <div className="relative flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-gold-accent to-dark-navy border border-gold-accent/40 shadow-gold-glow flex-shrink-0">
-            {profile.logoImage ? (
-              <img 
-                src={profile.logoImage} 
-                alt="Logo" 
-                className="w-full h-full object-cover rounded-xl"
-              />
-            ) : (
-              <span className="font-sans font-black text-xl text-white tracking-wider">
-                {profile.initials || 'M'}
-              </span>
-            )}
-            <div className="absolute -bottom-1 -right-1 w-3 h-3 rounded-full bg-gold-accent" />
-          </div>
-          <div>
-            <h2 className="text-silver-text font-bold text-base leading-tight tracking-wide truncate max-w-[170px]">
-              {profile.name}
-            </h2>
-            <p className="text-gold-accent font-medium text-[10px] tracking-wider uppercase truncate max-w-[170px]">
-              {profile.role}
-            </p>
-          </div>
+          {profile.logoImage ? (
+            /* Brand lockup (wide logo image — contains the name + title) */
+            <img
+              src={profile.logoImage}
+              alt="Mensah Q. Suku Jr — Founder & CEO"
+              className="h-12 w-auto max-w-full object-contain rounded-lg"
+            />
+          ) : (
+            <>
+              {/* Custom Logo Monogram / Image */}
+              <div className="relative flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-gold-accent to-dark-navy border border-gold-accent/40 shadow-gold-glow flex-shrink-0">
+                <span className="font-sans font-black text-xl text-white tracking-wider">
+                  {profile.initials || 'M'}
+                </span>
+                <div className="absolute -bottom-1 -right-1 w-3 h-3 rounded-full bg-gold-accent" />
+              </div>
+              <div>
+                <h2 className="text-silver-text font-bold text-base leading-tight tracking-wide truncate max-w-[170px]">
+                  {profile.name}
+                </h2>
+                <p className="text-gold-accent font-medium text-[10px] tracking-wider uppercase truncate max-w-[170px]">
+                  {profile.role}
+                </p>
+              </div>
+            </>
+          )}
         </div>
 
         {/* Navigation Middle Links */}
@@ -134,43 +143,66 @@ export default function SidebarNavigation({ activeSection, onNavClick }: Sidebar
             className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl border border-dark-navy hover:border-gold-accent/40 bg-obsidian text-xs hover:text-silver-text transition-all duration-300 group cursor-pointer text-left"
           >
             <span className="font-semibold text-muted-gray group-hover:text-silver-text truncate pr-2">
-              Select Export Format...
+              {selectedVariantMeta.label} CV — Select format…
             </span>
             <Download className="w-4 h-4 text-gold-accent group-hover:scale-110 transition-transform duration-300 flex-shrink-0" />
           </button>
 
           {showFormatPicker && (
-            <div className="absolute bottom-full left-0 right-0 mb-2 bg-deep-obsidian border border-dark-navy/60 rounded-xl overflow-hidden shadow-2xl z-50 flex flex-col divide-y divide-dark-navy/30">
-              <button
-                onClick={() => {
-                  downloadCV('pdf')
-                  setShowFormatPicker(false)
-                }}
-                className="w-full text-left px-4 py-2.5 text-silver-text hover:bg-gold-accent hover:text-[#111C33] text-xs font-bold transition-all duration-200 cursor-pointer flex items-center justify-between"
-              >
-                <span>Export as PDF Document</span>
-                <span className="text-[9px] uppercase tracking-wider opacity-60">.pdf</span>
-              </button>
-              <button
-                onClick={() => {
-                  downloadCV('word')
-                  setShowFormatPicker(false)
-                }}
-                className="w-full text-left px-4 py-2.5 text-silver-text hover:bg-gold-accent hover:text-[#111C33] text-xs font-bold transition-all duration-200 cursor-pointer flex items-center justify-between"
-              >
-                <span>Export as Word Document</span>
-                <span className="text-[9px] uppercase tracking-wider opacity-60">.doc</span>
-              </button>
-              <button
-                onClick={() => {
-                  downloadCV('png')
-                  setShowFormatPicker(false)
-                }}
-                className="w-full text-left px-4 py-2.5 text-silver-text hover:bg-gold-accent hover:text-[#111C33] text-xs font-bold transition-all duration-200 cursor-pointer flex items-center justify-between"
-              >
-                <span>Export as High-Res Image</span>
-                <span className="text-[9px] uppercase tracking-wider opacity-60">.png</span>
-              </button>
+            <div className="absolute bottom-full left-0 right-0 mb-2 bg-deep-obsidian border border-dark-navy/60 rounded-xl overflow-hidden shadow-2xl z-50 flex flex-col max-h-[320px] overflow-y-auto">
+              {/* Step 1: pick a CV variant (driven by CV_VARIANTS, never hardcoded) */}
+              <p className="px-4 pt-3 pb-1 text-[9px] uppercase font-bold tracking-widest text-muted-gray">CV variant</p>
+              {CV_VARIANTS.map((variant) => (
+                <button
+                  key={variant.id}
+                  onClick={() => setSelectedVariant(variant.id)}
+                  className={`w-full text-left px-4 py-2 text-xs transition-all duration-200 cursor-pointer flex items-center justify-between gap-2 ${
+                    variant.id === selectedVariant
+                      ? 'bg-gold-accent text-[#111C33] font-bold'
+                      : 'text-silver-text hover:bg-gold-accent/10 hover:text-gold-accent font-medium'
+                  }`}
+                >
+                  <span>{variant.label}</span>
+                  <span className={`text-[9px] truncate ${variant.id === selectedVariant ? 'opacity-70' : 'opacity-50'}`}>
+                    {variant.tagline}
+                  </span>
+                </button>
+              ))}
+
+              {/* Step 2: pick a format for the selected variant */}
+              <p className="px-4 pt-3 pb-1 text-[9px] uppercase font-bold tracking-widest text-muted-gray border-t border-dark-navy/30 mt-1">Format — {selectedVariantMeta.label}</p>
+              <div className="flex flex-col divide-y divide-dark-navy/30 pb-1">
+                <button
+                  onClick={() => {
+                    void downloadCV('pdf', selectedVariant)
+                    setShowFormatPicker(false)
+                  }}
+                  className="w-full text-left px-4 py-2.5 text-silver-text hover:bg-gold-accent hover:text-[#111C33] text-xs font-bold transition-all duration-200 cursor-pointer flex items-center justify-between"
+                >
+                  <span>Export as PDF Document</span>
+                  <span className="text-[9px] uppercase tracking-wider opacity-60">.pdf</span>
+                </button>
+                <button
+                  onClick={() => {
+                    void downloadCV('word', selectedVariant)
+                    setShowFormatPicker(false)
+                  }}
+                  className="w-full text-left px-4 py-2.5 text-silver-text hover:bg-gold-accent hover:text-[#111C33] text-xs font-bold transition-all duration-200 cursor-pointer flex items-center justify-between"
+                >
+                  <span>Export as Word Document</span>
+                  <span className="text-[9px] uppercase tracking-wider opacity-60">.doc</span>
+                </button>
+                <button
+                  onClick={() => {
+                    void downloadCV('png', selectedVariant)
+                    setShowFormatPicker(false)
+                  }}
+                  className="w-full text-left px-4 py-2.5 text-silver-text hover:bg-gold-accent hover:text-[#111C33] text-xs font-bold transition-all duration-200 cursor-pointer flex items-center justify-between"
+                >
+                  <span>Export as High-Res Image</span>
+                  <span className="text-[9px] uppercase tracking-wider opacity-60">.png</span>
+                </button>
+              </div>
             </div>
           )}
         </div>
@@ -303,6 +335,15 @@ export default function SidebarNavigation({ activeSection, onNavClick }: Sidebar
             </div>
           </div>
         </div>
+
+        {/* Discreet admin entry — bottom of the sidebar (desktop + mobile drawer) */}
+        <button
+          onClick={() => handleLinkClick('admin')}
+          className="mt-4 flex items-center justify-center space-x-1.5 w-full text-[10px] uppercase font-bold tracking-widest text-muted-gray/50 hover:text-gold-accent transition-colors duration-300 cursor-pointer"
+        >
+          <Lock className="w-3 h-3" />
+          <span>Admin Access</span>
+        </button>
       </div>
     </div>
   )
@@ -323,19 +364,19 @@ export default function SidebarNavigation({ activeSection, onNavClick }: Sidebar
         style={{ borderRadius: '0px' }}
       >
         <div className="flex items-center space-x-2">
-          <div className="relative flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br from-gold-accent to-dark-navy border border-gold-accent/40 shadow-gold-glow flex-shrink-0">
-            {profile.logoImage ? (
-              <img 
-                src={profile.logoImage} 
-                alt="Logo" 
-                className="w-full h-full object-cover rounded-lg"
-              />
-            ) : (
+          {profile.logoImage ? (
+            <img
+              src={profile.logoImage}
+              alt="Mensah Q. Suku Jr — Founder & CEO"
+              className="h-8 w-auto max-w-[180px] object-contain rounded-md"
+            />
+          ) : (
+            <div className="relative flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br from-gold-accent to-dark-navy border border-gold-accent/40 shadow-gold-glow flex-shrink-0">
               <span className="font-sans font-black text-xs text-white">
                 {profile.initials || 'M'}
               </span>
-            )}
-          </div>
+            </div>
+          )}
           <div>
             <h2 className="text-silver-text font-bold text-sm tracking-wide truncate max-w-[150px]">
               {profile.name}

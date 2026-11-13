@@ -1,6 +1,16 @@
 /* eslint-disable react-refresh/only-export-components */
 import React, { createContext, useContext, useState, useEffect } from 'react'
+import { isSha256Hex } from '../lib/sha256'
 import { supabase } from '../supabaseClient'
+import { CV_VARIANT_FILENAMES, getCVVariant } from '../data/cvVariants'
+import type { CVVariantContent, CVVariantId } from '../data/cvVariants'
+
+// Default admin password, stored ONLY as its SHA-256 hash. The plaintext is
+// never written to code, storage, or git history. To rotate the password,
+// replace this hash with the SHA-256 hash of the new password.
+export const DEFAULT_ADMIN_PASSWORD_HASH =
+  '63cd97af0603fc96d5e24c6c67877878dd2c359326aaaebfdc0ad075ab4a14fc'
+
 
 export type VisualMode = 'flat' | 'neumorphic' | 'glassmorphic' | 'claymorphic'
 export type PersonaTone = 'executive' | 'technologist' | 'academic'
@@ -27,6 +37,19 @@ export interface ProjectItem {
   mockup: 'showcase' | 'eye-tracking' | 'certificate-auth' | 'network-routing' | 'giin-portal'
   link: string
   status?: string // e.g. 'Live', 'In build', 'In formation', 'Complete', 'In progress'
+  // Source-code gating: when repoGated is true the repo is shown by name +
+  // description only, with an "Unlock source access" flow. The actual repo
+  // URL is NEVER stored in code or in a Supabase row — it is handed over
+  // only after payment, via the payment link configured in the gating UI.
+  repoName?: string
+  repoDescription?: string
+  repoGated?: boolean
+  // Flutterwave (confirmed payment provider): the payment link Suku creates
+  // in his Flutterwave for Business dashboard for this repo, and the price
+  // he sets. Both are empty until he supplies them — never invent a price.
+  // Until repoPaymentLink is set the gate shows "payment setup in progress".
+  repoPaymentLink?: string
+  repoPrice?: string
 }
 
 export interface CertItem {
@@ -37,6 +60,7 @@ export interface CertItem {
   date: string
   authority: string
   imageUrl?: string
+  link?: string // optional link to the certificate file (only where a real PDF exists)
 }
 
 export interface MetricItem {
@@ -303,11 +327,12 @@ interface BrandingContextType {
   setIsAuthenticated: (auth: boolean) => void
   adminUsername: string
   setAdminUsername: (username: string) => void
+  // Stored admin credential, as a SHA-256 hex hash — never plaintext.
   adminPassword: string
-  setAdminPassword: (password: string) => void
+  setAdminPassword: (passwordHash: string) => void
   heroCopy: PersonaCopyMap
   setHeroCopy: (copy: PersonaCopyMap) => void
-  downloadCV: (format: 'pdf' | 'word' | 'png') => void
+  downloadCV: (format: 'pdf' | 'word' | 'png', variantId?: CVVariantId) => Promise<void>
 }
 
 const BrandingContext = createContext<BrandingContextType | undefined>(undefined)
@@ -331,8 +356,8 @@ const DEFAULT_PROFILE: ProfileDetails = {
   githubUrl2: 'https://github.com/Global-Impact-Innovators-Ltd-GIIN',
   githubUrl3: '',
   githubUrl4: '',
-  profileImage: '/profile.png',
-  logoImage: ''
+  profileImage: '/profile.jpg',
+  logoImage: '/logo-lockup.png'
 }
 
 const DEFAULT_SERVICES: ServiceItem[] = [
@@ -383,7 +408,10 @@ const DEFAULT_PROJECTS: ProjectItem[] = [
     iconName: 'Video',
     mockup: 'showcase',
     link: 'https://giinmeet.nimdaukus.com',
-    status: 'Live'
+    status: 'Live',
+    repoName: 'GiinMeet',
+    repoDescription: 'Next.js video-meeting platform — LiveKit rooms, Supabase backend, waiting room and passcodes, host controls, attendance and meeting templates.',
+    repoGated: true
   },
   {
     id: 'p2',
@@ -450,6 +478,28 @@ const DEFAULT_PROJECTS: ProjectItem[] = [
     mockup: 'showcase',
     link: '',
     status: 'In progress'
+  },
+  {
+    id: 'p8',
+    title: 'VMware Enterprise Lab — lab.local',
+    subtitle: 'Private VMware teaching lab on 192.168.10.0/24 — SRV1 and SRV2 domain controllers with Active Directory, DNS and DHCP, VLANs and subnetting, built for S4–S6 networking lessons and the Windows Server course.',
+    category: 'cyber-net',
+    tech: ['VMware', 'Windows Server', 'Active Directory', 'DNS', 'DHCP'],
+    iconName: 'Server',
+    mockup: 'showcase',
+    link: '',
+    status: 'Ongoing'
+  },
+  {
+    id: 'p9',
+    title: 'Networking Lessons v2 — S4–S6',
+    subtitle: 'Cisco-driven networking lessons for senior-high students in Kigali — 377 slides, 70% practical: subnetting and the Magic Number method, VLANs, routing, DNS/DHCP and Packet Tracer labs.',
+    category: 'cyber-net',
+    tech: ['Cisco', 'Packet Tracer', 'Subnetting', 'VLANs'],
+    iconName: 'Network',
+    mockup: 'showcase',
+    link: '',
+    status: 'Complete'
   }
 ]
 
@@ -460,7 +510,8 @@ const DEFAULT_CERTS: CertItem[] = [
     issuer: 'UNILAK (University of Lay Adventists of Kigali)',
     details: '75.60/100, Second Class Upper. Degree conferred 31 October 2026. Specialisation in enterprise routing and switching, systems architecture and security.',
     date: 'Oct 2026',
-    authority: 'UNILAK'
+    authority: 'UNILAK',
+    link: '/certs/Bachelor_Degree.pdf'
   },
   {
     id: 'c2',
@@ -469,7 +520,8 @@ const DEFAULT_CERTS: CertItem[] = [
     details: 'Certificate of Participation. Security analytics, cryptography, endpoint protection, infrastructure audits and risk vectors.',
     date: 'Jan 2026',
     authority: 'AFRETEC Network',
-    imageUrl: '/cyber_cert_doc.png'
+    imageUrl: '/cyber_cert_doc.png',
+    link: '/certs/Afretec_Cybersecurity.pdf'
   },
   {
     id: 'c3',
@@ -477,7 +529,8 @@ const DEFAULT_CERTS: CertItem[] = [
     issuer: 'Carnegie Mellon University Africa',
     details: 'Advanced engineering paradigms, computing models, systems and professional technology translation.',
     date: '2026',
-    authority: 'CMU-Africa'
+    authority: 'CMU-Africa',
+    link: '/certs/CMU-AFRICA_BRIDGE.pdf'
   },
   {
     id: 'c4',
@@ -494,6 +547,22 @@ const DEFAULT_CERTS: CertItem[] = [
     details: 'English proficiency certified: Speaking 135, Writing 115, Reading 125, Listening 115.',
     date: 'Feb 2026',
     authority: 'Duolingo'
+  },
+  {
+    id: 'c6',
+    title: 'CS406: Information Security',
+    issuer: 'Saylor Academy',
+    details: 'Information security fundamentals — threats, cryptography, access control and secure systems.',
+    date: '',
+    authority: 'Saylor Academy'
+  },
+  {
+    id: 'c7',
+    title: 'A Complete Course on Windows Server Administration',
+    issuer: 'Coursera',
+    details: 'Windows Server administration — installation, Active Directory, DNS, DHCP and server roles.',
+    date: '',
+    authority: 'Coursera'
   }
 ]
 
@@ -512,7 +581,12 @@ export const BrandingProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     return localStorage.getItem('adminUsername') || 'mensahqsukujr@gmail.com'
   })
   const [adminPassword, setAdminPasswordState] = useState<string>(() => {
-    return localStorage.getItem('adminPassword') || 'mqsukuadmin'
+    const stored = localStorage.getItem('adminPassword')
+    // Only a 64-char hex hash is ever kept. Any stored plaintext value
+    // (e.g. the old default) is migrated to the hashed default.
+    if (stored && isSha256Hex(stored)) return stored
+    localStorage.setItem('adminPassword', DEFAULT_ADMIN_PASSWORD_HASH)
+    return DEFAULT_ADMIN_PASSWORD_HASH
   })
 
   const [theme, setThemeState] = useState<ThemeMode>(() => {
@@ -580,9 +654,12 @@ export const BrandingProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     setAdminUsernameState(username)
     localStorage.setItem('adminUsername', username)
   }
-  const setAdminPassword = (password: string) => {
-    setAdminPasswordState(password)
-    localStorage.setItem('adminPassword', password)
+  // Stores a SHA-256 hex hash only — callers must hash the password first.
+  // Non-hash values are ignored so plaintext can never be persisted.
+  const setAdminPassword = (passwordHash: string) => {
+    if (!isSha256Hex(passwordHash)) return
+    setAdminPasswordState(passwordHash)
+    localStorage.setItem('adminPassword', passwordHash)
   }
 
   // Sync theme class
@@ -1011,249 +1088,398 @@ export const BrandingProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     setHeroCopy(DEFAULT_HERO_COPY)
     setAdminUsernameState('mensahqsukujr@gmail.com')
     localStorage.setItem('adminUsername', 'mensahqsukujr@gmail.com')
-    setAdminPasswordState('mqsukuadmin')
-    localStorage.setItem('adminPassword', 'mqsukuadmin')
+    setAdminPasswordState(DEFAULT_ADMIN_PASSWORD_HASH)
+    localStorage.setItem('adminPassword', DEFAULT_ADMIN_PASSWORD_HASH)
     setIsAuthenticated(false)
     applyPreset(COLOR_PRESETS[0]) // 8Bees Premium
   }
 
-  const downloadCV = async (format: 'pdf' | 'word' | 'png') => {
+  const downloadCV = async (format: 'pdf' | 'word' | 'png', variantId?: CVVariantId): Promise<void> => {
+    // Full per-variant CV content, built only from Suku's real CV files
+    // (see src/data/cvVariants.ts). Defaults to Frontend when no variant
+    // (or an unknown one) is requested.
+    const cv: CVVariantContent = getCVVariant(variantId)
+    const fileBase = `Mensah_Q_Suku_Jr_${CV_VARIANT_FILENAMES[cv.id]}_CV`
+
+    const downloadBlob = (blob: Blob, filename: string) => {
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = filename
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      URL.revokeObjectURL(url)
+    }
+
     if (format === 'word') {
-      const activeCopy = heroCopy[personaTone] || heroCopy.technologist
+      const esc = (s: string) =>
+        s
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+
+      let lastSection = ''
+      const experienceHtml = cv.experience
+        .map((job) => {
+          const subhead =
+            job.section && job.section !== lastSection
+              ? `<h3>${esc(job.section)}</h3>`
+              : ''
+          lastSection = job.section ?? ''
+          const location = job.location ? ` &mdash; ${esc(job.location)}` : ''
+          return `${subhead}
+            <div>
+              <span class="item-title">${esc(job.role)} | ${esc(job.company)}${location}</span>
+              <span class="item-subtitle">${esc(job.dates)}</span>
+              <ul>${job.bullets.map((b) => `<li>${esc(b)}</li>`).join('')}</ul>
+            </div>`
+        })
+        .join('')
+
       const docContent = `
         <html xmlns:o="urn:schemas-microsoft-excel-description-data:office:office" xmlns:w="urn:schemas-microsoft-excel-description-data:office:word" xmlns="http://www.w3.org/TR/REC-html40">
         <head>
-          <title>Curriculum Vitae - ${profile.name}</title>
+          <meta charset="utf-8" />
+          <title>Curriculum Vitae - ${esc(cv.name)} (${esc(CV_VARIANT_FILENAMES[cv.id])})</title>
           <style>
             body { font-family: 'Arial', sans-serif; color: #333333; line-height: 1.5; padding: 20px; }
             h1 { color: #A5BF13; font-size: 26pt; margin-bottom: 2px; text-transform: uppercase; }
             h2 { color: #292929; border-bottom: 2px solid #A5BF13; font-size: 16pt; margin-top: 20px; padding-bottom: 3px; }
+            h3 { color: #555555; font-size: 12pt; margin-top: 14px; margin-bottom: 4px; text-transform: uppercase; }
             .subtitle { font-size: 14pt; font-weight: bold; color: #555555; }
             .contact-info { font-size: 10pt; margin-bottom: 20px; color: #666666; }
             .item-title { font-weight: bold; font-size: 11pt; color: #292929; }
             .item-subtitle { font-style: italic; font-size: 10pt; color: #555555; }
             .item-desc { font-size: 10pt; margin-bottom: 10px; color: #666666; }
+            ul { font-size: 10pt; color: #666666; margin-top: 2px; }
           </style>
         </head>
         <body>
-          <h1>${profile.name.toUpperCase()}</h1>
-          <div class="subtitle">${profile.role} - ${profile.company}</div>
+          <h1>${esc(cv.name.toUpperCase())}</h1>
+          <div class="subtitle">${esc(cv.headline)}</div>
+          ${cv.subHeadline ? `<div class="subtitle" style="font-size: 11pt;">${esc(cv.subHeadline)}</div>` : ''}
           <div class="contact-info">
-            📍 Location: ${profile.location} | 📧 Primary Email: ${profile.email} ${profile.email2 ? `| 📧 Secondary Email: ${profile.email2}` : ''} | 📞 Phone: ${profile.phone || '+250 798 655 345'}
+            ${esc(cv.location)} | ${esc(cv.phone)} | ${esc(cv.email)}<br/>
+            Portfolio: ${esc(cv.portfolio)} | LinkedIn: ${esc(cv.linkedin)}
           </div>
-          
+
           <h2>PROFESSIONAL SUMMARY</h2>
-          <p>${activeCopy.description}</p>
-          
-          <h2>SECURITY CREDENTIALS & CERTIFICATIONS</h2>
-          ${certifications.map(c => `
+          <p>${esc(cv.summary)}</p>
+
+          <h2>CORE SKILLS</h2>
+          <p>${cv.skills.map((s) => esc(s)).join(' &bull; ')}</p>
+
+          <h2>PROFESSIONAL EXPERIENCE</h2>
+          ${experienceHtml}
+
+          ${
+            cv.projects.length > 0
+              ? `<h2>KEY PROJECTS</h2>
+          ${cv.projects
+            .map(
+              (p) => `
             <div>
-              <span class="item-title">${c.title}</span> - <span class="item-subtitle">${c.issuer} (${c.date})</span>
-              <p class="item-desc">${c.details}<br/>Authority ID: ${c.authority}</p>
-            </div>
-          `).join('')}
-          
-          <h2>SELECTED PROJECTS</h2>
-          ${projects.map(p => `
+              <span class="item-title">${esc(p.title)}</span>
+              <p class="item-desc">${esc(p.description)}${
+                p.link
+                  ? `<br/><a href="${esc(p.link)}">${esc(p.link)}</a>`
+                  : ''
+              }</p>
+            </div>`
+            )
+            .join('')}`
+              : ''
+          }
+
+          <h2>EDUCATION</h2>
+          <div>
+            <span class="item-title">${esc(cv.education.degree)}</span>
+            ${cv.education.dates ? `<span class="item-subtitle">${esc(cv.education.dates)}</span>` : ''}
+            <p class="item-desc">${esc(cv.education.institution)}</p>
+          </div>
+
+          <h2>CERTIFICATIONS</h2>
+          <ul>
+            ${cv.certs.map((c) => `<li><b>${esc(c.title)}</b> &mdash; ${esc(c.issuer)}</li>`).join('')}
+          </ul>
+
+          <h2>LANGUAGES</h2>
+          <p>${cv.languages.map((l) => esc(l)).join(' &nbsp;|&nbsp; ')}</p>
+
+          <h2>REFERENCES</h2>
+          ${cv.references
+            .map(
+              (r) => `
             <div>
-              <span class="item-title">${p.title}</span> - <span class="item-subtitle">${p.subtitle}</span>
-              <p class="item-desc">Stack: ${p.tech.join(', ')}</p>
-            </div>
-          `).join('')}
+              <span class="item-title">${esc(r.name)}</span>
+              <p class="item-desc">${esc(r.title)}, ${esc(r.org)}<br/>Tel: ${esc(r.phone)}${
+                r.email ? `<br/>Email: ${esc(r.email)}` : ''
+              }</p>
+            </div>`
+            )
+            .join('')}
         </body>
         </html>
       `
-      const blob = new Blob(['\ufeff' + docContent], { type: 'application/msword' })
-      const url = URL.createObjectURL(blob)
-      const link = document.createElement('a')
-      link.href = url
-      link.download = `Mensah_Suku_CV_Verified.doc`
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
+      downloadBlob(
+        new Blob(['\ufeff' + docContent], { type: 'application/msword' }),
+        `${fileBase}.doc`
+      )
       return
     }
 
+    // ---- PDF / PNG: one tall canvas, single-column flow layout ----
+    // The old 1200x1650 single page could only fit a summary plus the
+    // first 4 certs/projects, so full experience never rendered. The canvas
+    // is now tall enough for the whole variant and is cropped to the real
+    // content height; PDF slices it into 1200x1650 pages, PNG downloads
+    // the whole (tall) image.
+    const PAGE_W = 1200
+    const PAGE_H = 1650
+    const MARGIN = 64
+    const CONTENT_W = PAGE_W - MARGIN * 2
+    const MAX_H = 6000
+
     const canvas = document.createElement('canvas')
-    canvas.width = 1200
-    canvas.height = 1650
+    canvas.width = PAGE_W
+    canvas.height = MAX_H
     const ctx = canvas.getContext('2d')
     if (!ctx) return
 
-    // Draw background
     ctx.fillStyle = '#FFFFFF'
-    ctx.fillRect(0, 0, canvas.width, canvas.height)
+    ctx.fillRect(0, 0, PAGE_W, MAX_H)
 
-    // Draw left panel container (Aesthetic slate/gray highlight panel)
-    ctx.fillStyle = '#F0F0F0'
-    ctx.fillRect(0, 0, 420, canvas.height)
-
-    // Left Panel content: Initials Arc
-    ctx.fillStyle = '#A5BF13'
-    ctx.beginPath()
-    ctx.arc(210, 120, 50, 0, Math.PI * 2)
-    ctx.fill()
-
-    ctx.fillStyle = '#FFFFFF'
-    ctx.font = 'bold 36px sans-serif'
-    ctx.textAlign = 'center'
-    ctx.fillText(profile.initials || 'MS', 210, 132)
-
-    // Contact Title
-    ctx.fillStyle = '#292929'
-    ctx.font = 'bold 18px sans-serif'
-    ctx.textAlign = 'left'
-    ctx.fillText('CONTACT DETAILS', 40, 240)
-    
-    // Draw contact divider
-    ctx.fillStyle = '#62929E'
-    ctx.fillRect(40, 250, 340, 3)
-
-    // Details text
-    ctx.fillStyle = '#555555'
-    ctx.font = '13px sans-serif'
-    ctx.fillText(`📧 ${profile.email}`, 40, 290)
-    if (profile.email2) {
-      ctx.fillText(`📧 ${profile.email2}`, 40, 320)
+    const wrap = (text: string, font: string, maxWidth: number): string[] => {
+      ctx.font = font
+      const words = text.split(' ')
+      const lines: string[] = []
+      let line = ''
+      for (const word of words) {
+        const test = line ? `${line} ${word}` : word
+        if (ctx.measureText(test).width > maxWidth && line) {
+          lines.push(line)
+          line = word
+        } else {
+          line = test
+        }
+      }
+      if (line) lines.push(line)
+      return lines
     }
-    ctx.fillText(`📞 ${profile.phone || '+250 798 655 345'}`, 40, 350)
-    ctx.fillText(`📍 ${profile.location}`, 40, 380)
-    ctx.fillText(`🔗 linkedin.com/in/mensah-q-suku-jr-4ba086292`, 40, 410)
 
-    // Skills Section
-    ctx.fillStyle = '#292929'
-    ctx.font = 'bold 18px sans-serif'
-    ctx.fillText('CORE COMPETENCIES', 40, 480)
-    ctx.fillStyle = '#62929E'
-    ctx.fillRect(40, 490, 340, 3)
+    let y = 0
 
-    const skillList = [
-      'React / TypeScript / Next.js',
-      'NestJS & Prisma APIs',
-      'Cybersecurity Auditing',
-      'Cisco Network Routing',
-      'Windows Server Administration',
-      'IT Venture Strategy'
-    ]
-    ctx.fillStyle = '#555555'
-    ctx.font = '13px sans-serif'
-    skillList.forEach((sk, i) => {
-      ctx.fillText(`⚡ ${sk}`, 40, 525 + i * 32)
-    })
-
-    // Languages Section
-    ctx.fillStyle = '#292929'
-    ctx.font = 'bold 18px sans-serif'
-    ctx.fillText('LANGUAGES', 40, 750)
-    ctx.fillStyle = '#62929E'
-    ctx.fillRect(40, 760, 340, 3)
-    ctx.fillStyle = '#555555'
-    ctx.font = '14px sans-serif'
-    ctx.fillText('• English (Fluent)', 40, 800)
-
-    // Right Column content
-    ctx.fillStyle = '#292929'
-    ctx.font = 'bold 42px sans-serif'
-    ctx.fillText(profile.name.toUpperCase(), 460, 110)
-
+    // Header band
     ctx.fillStyle = '#A5BF13'
-    ctx.font = 'bold 18px sans-serif'
-    ctx.fillText(`${profile.role} • ${profile.company}`, 460, 145)
-
-    // Biography Section
+    ctx.fillRect(0, 0, PAGE_W, 10)
+    y = 78
     ctx.fillStyle = '#292929'
-    ctx.font = 'bold 18px sans-serif'
-    ctx.fillText('PROFESSIONAL SUMMARY', 460, 240)
+    ctx.font = 'bold 40px sans-serif'
+    ctx.textAlign = 'left'
+    ctx.fillText(cv.name.toUpperCase(), MARGIN, y)
+    y += 34
     ctx.fillStyle = '#A5BF13'
-    ctx.fillRect(460, 250, 700, 3)
-
-    ctx.fillStyle = '#555555'
-    ctx.font = '14px sans-serif'
-    const activeCopy = heroCopy[personaTone] || heroCopy.technologist
-    const bioText = activeCopy.description
-    const words = bioText.split(' ')
-    let line = ''
-    let y = 285
-    for (let n = 0; n < words.length; n++) {
-      let testLine = line + words[n] + ' '
-      if (ctx.measureText(testLine).width > 700 && n > 0) {
-        ctx.fillText(line, 460, y)
-        line = words[n] + ' '
+    for (const line of wrap(cv.headline, 'bold 17px sans-serif', CONTENT_W)) {
+      ctx.font = 'bold 17px sans-serif'
+      ctx.fillText(line, MARGIN, y)
+      y += 24
+    }
+    if (cv.subHeadline) {
+      ctx.fillStyle = '#555555'
+      for (const line of wrap(cv.subHeadline, '15px sans-serif', CONTENT_W)) {
+        ctx.font = '15px sans-serif'
+        ctx.fillText(line, MARGIN, y)
         y += 22
-      } else {
-        line = testLine
       }
     }
-    ctx.fillText(line, 460, y)
-
-    // Credentials / Education Section
-    ctx.fillStyle = '#292929'
-    ctx.font = 'bold 18px sans-serif'
-    ctx.fillText('CREDENTIALS & SECURITY CERTIFICATIONS', 460, 380)
+    y += 8
+    ctx.fillStyle = '#555555'
+    ctx.font = '13.5px sans-serif'
+    ctx.fillText(`${cv.location}  |  ${cv.phone}  |  ${cv.email}`, MARGIN, y)
+    y += 22
+    ctx.fillText(`Portfolio: ${cv.portfolio}  |  LinkedIn: ${cv.linkedin}`, MARGIN, y)
+    y += 30
     ctx.fillStyle = '#A5BF13'
-    ctx.fillRect(460, 390, 700, 3)
+    ctx.fillRect(MARGIN, y, CONTENT_W, 3)
+    y += 34
 
-    certifications.slice(0, 4).forEach((cert, i) => {
+    const sectionHeading = (title: string) => {
+      ctx.fillStyle = '#292929'
+      ctx.font = 'bold 18px sans-serif'
+      ctx.fillText(title, MARGIN, y)
+      y += 10
+      ctx.fillStyle = '#A5BF13'
+      ctx.fillRect(MARGIN, y, CONTENT_W, 3)
+      y += 28
+    }
+
+    const paragraph = (text: string, font = '14px sans-serif', lineHeight = 22) => {
+      ctx.fillStyle = '#555555'
+      for (const line of wrap(text, font, CONTENT_W)) {
+        ctx.font = font
+        ctx.fillText(line, MARGIN, y)
+        y += lineHeight
+      }
+    }
+
+    const bullet = (text: string, font = '13.5px sans-serif', lineHeight = 21) => {
+      const indent = MARGIN + 18
+      ctx.fillStyle = '#555555'
+      ctx.font = font
+      ctx.fillText('•', MARGIN, y)
+      for (const line of wrap(text, font, CONTENT_W - 18)) {
+        ctx.fillText(line, indent, y)
+        y += lineHeight
+      }
+    }
+
+    // Professional summary
+    sectionHeading('PROFESSIONAL SUMMARY')
+    paragraph(cv.summary)
+    y += 16
+
+    // Skills (the variant's own full list — never a hardcoded subset)
+    sectionHeading('CORE SKILLS')
+    paragraph(cv.skills.join('  •  '))
+    y += 16
+
+    // Experience — the section the old generator omitted entirely.
+    sectionHeading('PROFESSIONAL EXPERIENCE')
+    let lastSection = ''
+    for (const job of cv.experience) {
+      if (job.section && job.section !== lastSection) {
+        ctx.fillStyle = '#555555'
+        ctx.font = 'bold 14px sans-serif'
+        ctx.fillText(job.section.toUpperCase(), MARGIN, y)
+        y += 26
+      }
+      lastSection = job.section ?? ''
+      const roleLine = `${job.role}  |  ${job.company}${job.location ? ` — ${job.location}` : ''}`
+      ctx.fillStyle = '#292929'
+      ctx.font = 'bold 15px sans-serif'
+      ctx.fillText(roleLine, MARGIN, y)
+      ctx.fillStyle = '#555555'
+      ctx.font = '13px sans-serif'
+      const datesWidth = ctx.measureText(job.dates).width
+      ctx.fillText(job.dates, PAGE_W - MARGIN - datesWidth, y)
+      y += 24
+      for (const b of job.bullets) bullet(b)
+      y += 10
+    }
+    y += 8
+
+    // Projects (only the variants that have them: Frontend, Executive)
+    if (cv.projects.length > 0) {
+      sectionHeading('KEY PROJECTS')
+      for (const p of cv.projects) {
+        ctx.fillStyle = '#292929'
+        ctx.font = 'bold 14.5px sans-serif'
+        ctx.fillText(p.title, MARGIN, y)
+        y += 22
+        paragraph(p.description, '13px sans-serif', 20)
+        if (p.link) {
+          ctx.fillStyle = '#2F6F7E'
+          ctx.font = '12.5px sans-serif'
+          ctx.fillText(p.link, MARGIN, y)
+          y += 20
+        }
+        y += 8
+      }
+      y += 8
+    }
+
+    // Education
+    sectionHeading('EDUCATION')
+    ctx.fillStyle = '#292929'
+    ctx.font = 'bold 15px sans-serif'
+    ctx.fillText(cv.education.degree, MARGIN, y)
+    if (cv.education.dates) {
+      ctx.fillStyle = '#555555'
+      ctx.font = '13px sans-serif'
+      const dw = ctx.measureText(cv.education.dates).width
+      ctx.fillText(cv.education.dates, PAGE_W - MARGIN - dw, y)
+    }
+    y += 24
+    paragraph(cv.education.institution, '13.5px sans-serif', 21)
+    y += 16
+
+    // Certifications (the variant's own full list — never sliced to 4)
+    sectionHeading('CERTIFICATIONS')
+    for (const c of cv.certs) bullet(`${c.title} — ${c.issuer}`)
+    y += 16
+
+    // Languages (exactly as printed on the CV)
+    sectionHeading('LANGUAGES')
+    paragraph(cv.languages.join('   |   '))
+    y += 16
+
+    // References
+    sectionHeading('REFERENCES')
+    for (const r of cv.references) {
       ctx.fillStyle = '#292929'
       ctx.font = 'bold 14px sans-serif'
-      ctx.fillText(cert.title, 460, 430 + i * 65)
-      ctx.fillStyle = '#555555'
-      ctx.font = '12px sans-serif'
-      ctx.fillText(`${cert.issuer} (${cert.date}) • Authority ID: ${cert.authority || 'N/A'}`, 460, 450 + i * 65)
-      ctx.fillText(cert.details || '', 460, 468 + i * 65)
-    })
+      ctx.fillText(r.name, MARGIN, y)
+      y += 22
+      paragraph(`${r.title}, ${r.org}`, '13px sans-serif', 20)
+      paragraph(`Tel: ${r.phone}${r.email ? `  |  Email: ${r.email}` : ''}`, '13px sans-serif', 20)
+      y += 8
+    }
 
-    // Selected Projects Section
-    ctx.fillStyle = '#292929'
-    ctx.font = 'bold 18px sans-serif'
-    ctx.fillText('SELECTED DIGITAL PROJECTS', 460, 710)
-    ctx.fillStyle = '#A5BF13'
-    ctx.fillRect(460, 720, 700, 3)
+    const contentH = Math.min(y + 40, MAX_H)
 
-    projects.slice(0, 4).forEach((proj, i) => {
-      ctx.fillStyle = '#292929'
-      ctx.font = 'bold 14px sans-serif'
-      ctx.fillText(proj.title, 460, 760 + i * 65)
-      ctx.fillStyle = '#555555'
-      ctx.font = '12px sans-serif'
-      ctx.fillText(`Category: ${proj.category.toUpperCase()} | Stack: ${proj.tech.join(', ')}`, 460, 780 + i * 65)
-      ctx.fillText(proj.subtitle, 460, 798 + i * 65)
-    })
-
-    // Watermark (Anti-Piracy)
+    // Watermark (anti-piracy), drawn across the whole tall canvas.
     ctx.save()
-    ctx.translate(canvas.width / 2, canvas.height / 2)
+    ctx.translate(PAGE_W / 2, contentH / 2)
     ctx.rotate(-Math.PI / 6)
     ctx.fillStyle = 'rgba(41, 41, 41, 0.05)'
     ctx.font = 'bold 30px sans-serif'
     ctx.textAlign = 'center'
-    for (let i = -5; i <= 5; i++) {
+    for (let i = -40; i <= 40; i++) {
       ctx.fillText('VERIFIED GENUINE CV // MENSAH SUKU JR PORTFOLIO SYSTEM', 0, i * 110)
     }
     ctx.restore()
 
+    // Crop the working canvas to the real content height.
+    const cropped = document.createElement('canvas')
+    cropped.width = PAGE_W
+    cropped.height = contentH
+    const croppedCtx = cropped.getContext('2d')
+    if (!croppedCtx) return
+    croppedCtx.drawImage(canvas, 0, 0, PAGE_W, contentH, 0, 0, PAGE_W, contentH)
+
     if (format === 'pdf') {
       // jsPDF is loaded on demand so the main bundle stays lean.
       const { jsPDF } = await import('jspdf')
-      const imgData = canvas.toDataURL('image/png')
-      const pdf = new jsPDF({
-        orientation: 'portrait',
-        unit: 'px',
-        format: [1200, 1650]
-      })
-      pdf.addImage(imgData, 'PNG', 0, 0, 1200, 1650)
-      pdf.save(`Mensah_Suku_CV_Verified.pdf`)
+      const pdf = new jsPDF({ orientation: 'portrait', unit: 'px', format: [PAGE_W, PAGE_H] })
+      const pages = Math.max(1, Math.ceil(contentH / PAGE_H))
+      for (let p = 0; p < pages; p++) {
+        const pageCanvas = document.createElement('canvas')
+        pageCanvas.width = PAGE_W
+        pageCanvas.height = PAGE_H
+        const pageCtx = pageCanvas.getContext('2d')
+        if (!pageCtx) continue
+        pageCtx.fillStyle = '#FFFFFF'
+        pageCtx.fillRect(0, 0, PAGE_W, PAGE_H)
+        pageCtx.drawImage(
+          cropped,
+          0, p * PAGE_H, PAGE_W, PAGE_H,
+          0, 0, PAGE_W, PAGE_H
+        )
+        if (p > 0) pdf.addPage([PAGE_W, PAGE_H], 'portrait')
+        pdf.addImage(pageCanvas.toDataURL('image/png'), 'PNG', 0, 0, PAGE_W, PAGE_H)
+      }
+      pdf.save(`${fileBase}.pdf`)
     } else {
-      const url = canvas.toDataURL('image/png')
-      const link = document.createElement('a')
-      link.href = url
-      link.download = `Mensah_Suku_CV_Verified.png`
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
+      downloadBlob(
+        await new Promise<Blob>((resolve, reject) =>
+          cropped.toBlob((b) => (b ? resolve(b) : reject(new Error('PNG export failed'))), 'image/png')
+        ),
+        `${fileBase}.png`
+      )
     }
   }
-
   return (
     <BrandingContext.Provider
       value={{

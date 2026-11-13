@@ -1,7 +1,7 @@
 import { useEffect, useState, lazy, Suspense } from 'react'
 import { BrowserRouter, Routes, Route, useLocation, useNavigate } from 'react-router-dom'
 import { AnimatePresence } from 'framer-motion'
-import { Lock, Sun, Moon, Send, Terminal } from 'lucide-react'
+import { Sun, Moon, Send, Terminal } from 'lucide-react'
 import { BrandingProvider, useBranding } from './context/BrandingContext'
 import BackgroundGlow from './components/BackgroundGlow'
 import SidebarNavigation from './components/SidebarNavigation'
@@ -65,18 +65,9 @@ function AppContent() {
         {/* Sticky Desktop Top Navbar (Hidden on Admin routes) */}
         {!isAdminRoute && (
           <nav 
-            className={`hidden lg:flex items-center justify-between w-full h-20 px-12 border-b border-dark-navy/35 backdrop-blur-md sticky top-0 z-30 card-style ${visualMode}`}
+            className={`hidden lg:flex items-center justify-end w-full h-20 px-12 border-b border-dark-navy/35 backdrop-blur-md sticky top-0 z-30 card-style ${visualMode}`}
             style={{ borderRadius: '0px' }}
           >
-            {/* Left Side: Admin Access */}
-            <button
-              onClick={() => navigate('/admin')}
-              className="flex items-center space-x-2 text-xs uppercase font-extrabold tracking-widest text-muted-gray hover:text-gold-accent transition-colors duration-300 cursor-pointer"
-            >
-              <Lock className="w-3.5 h-3.5 text-gold-accent" />
-              <span>Admin Access</span>
-            </button>
-
             {/* Right Side: Toggle Mode & Contact */}
             <div className="flex items-center space-x-4">
               {/* Desktop Theme Toggle */}
