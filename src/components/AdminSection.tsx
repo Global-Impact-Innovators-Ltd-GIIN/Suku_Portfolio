@@ -114,7 +114,7 @@ export default function AdminSection() {
 
   // List editor states
   const [newService, setNewService] = useState({ title: '', description: '', iconName: 'Code', badge: '' })
-  const [newProject, setNewProject] = useState({ title: '', subtitle: '', category: 'dev' as any, tech: '', mockup: 'showcase' as any, link: '', iconName: 'Cpu' })
+  const [newProject, setNewProject] = useState({ title: '', subtitle: '', category: 'dev' as any, tech: '', mockup: 'showcase' as any, link: '', liveUrl: '', iconName: 'Cpu' })
   const [newCert, setNewCert] = useState({ title: '', issuer: '', details: '', date: '', authority: '', imageUrl: '' })
 
   const profilePicInput = useRef<HTMLInputElement>(null)
@@ -236,13 +236,21 @@ export default function AdminSection() {
       tech: newProject.tech.split(',').map(t => t.trim()).filter(Boolean)
     }
     setProjects([...projects, item])
-    setNewProject({ title: '', subtitle: '', category: 'dev', tech: '', mockup: 'showcase', link: '', iconName: 'Cpu' })
+    setNewProject({ title: '', subtitle: '', category: 'dev', tech: '', mockup: 'showcase', link: '', liveUrl: '', iconName: 'Cpu' })
     showSuccess('Project added successfully!')
   }
 
   const handleDeleteProject = (id: string) => {
     setProjects(projects.filter(p => p.id !== id))
     showSuccess('Project removed.')
+  }
+
+  // Live site URL: update the verified live homepage of a project.
+  // Persists through setProjects like any other project edit
+  // (localStorage + Supabase sync). Only set URLs verified to load.
+  // Keeps `link` in sync so older renders that read `link` stay correct.
+  const updateProjectLiveUrl = (id: string, liveUrl: string) => {
+    setProjects(projects.map(p => (p.id === id ? { ...p, liveUrl, link: liveUrl } : p)))
   }
 
   // Source Access (Flutterwave gate): update the payment link / price of a
@@ -1325,6 +1333,11 @@ export default function AdminSection() {
                         <label className="text-muted-gray text-[9px] uppercase font-bold pl-1">Tech Stack (comma-separated)</label>
                         <input type="text" placeholder="React, Node, SQLite" value={newProject.tech} onChange={(e) => setNewProject({ ...newProject, tech: e.target.value })} className="w-full px-3 py-2 bg-obsidian border border-dark-navy/40 rounded-lg text-xs outline-none text-silver-text" />
                       </div>
+
+                      <div className="space-y-1">
+                        <label className="text-muted-gray text-[9px] uppercase font-bold pl-1">Live URL (verified homepage, optional)</label>
+                        <input type="url" placeholder="https://…" value={newProject.liveUrl} onChange={(e) => setNewProject({ ...newProject, liveUrl: e.target.value })} className="w-full px-3 py-2 bg-obsidian border border-dark-navy/40 rounded-lg text-xs outline-none text-silver-text" />
+                      </div>
                       
                       <div className="space-y-1">
                         <label className="text-muted-gray text-[9px] uppercase font-bold pl-1">Category</label>
@@ -1360,6 +1373,33 @@ export default function AdminSection() {
                           <button onClick={() => handleDeleteProject(p.id)} className="p-2 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-lg transition-colors cursor-pointer">
                             <Trash2 className="w-4 h-4" />
                           </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* LIVE SITE URLS — the verified homepage shown on each card */}
+                  {/* Only URLs verified to load belong here. A project with no
+                      live URL shows no link and its demo box is not clickable. */}
+                  <div className="space-y-4">
+                    <h3 className="text-silver-text font-bold text-lg border-b border-dark-navy/40 pb-2">Live Site URLs</h3>
+                    <p className="text-muted-gray text-xs leading-relaxed font-light">
+                      The live homepage shown on each project card as a “Visit live site” button — clicking the card’s demo box opens it too. Only add a URL you have checked loads (HTTP 200); leave it blank for projects with no live site.
+                    </p>
+                    <div className="space-y-3 max-h-96 overflow-y-auto pr-2">
+                      {projects.map(p => (
+                        <div key={p.id} className="p-4 bg-obsidian/40 border border-dark-navy/20 rounded-2xl space-y-3">
+                          <span className="text-xs font-bold text-silver-text block">{p.title}</span>
+                          <div className="space-y-1">
+                            <label className="text-muted-gray text-[9px] uppercase font-bold pl-1">Live URL</label>
+                            <input
+                              type="url"
+                              placeholder="https://… (leave blank if none)"
+                              value={p.liveUrl || ''}
+                              onChange={(e) => updateProjectLiveUrl(p.id, e.target.value)}
+                              className="w-full px-3 py-2 bg-obsidian border border-dark-navy/40 rounded-lg text-xs outline-none text-silver-text"
+                            />
+                          </div>
                         </div>
                       ))}
                     </div>
@@ -1681,7 +1721,13 @@ CREATE TABLE IF NOT EXISTS projects (
   iconName TEXT,
   mockup TEXT,
   link TEXT,
-  status TEXT
+  liveUrl TEXT,
+  status TEXT,
+  repoName TEXT,
+  repoDescription TEXT,
+  repoGated BOOLEAN,
+  repoPaymentLink TEXT,
+  repoPrice TEXT
 );
 
 -- 4. Certifications Table

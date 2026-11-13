@@ -36,6 +36,11 @@ export interface ProjectItem {
   // and also render as the showcase card.
   mockup: 'showcase' | 'eye-tracking' | 'certificate-auth' | 'network-routing' | 'giin-portal'
   link: string
+  // Live homepage / live site for the project. Shown on the card as a
+  // "Visit live site" button and makes the demo box clickable. Only set
+  // when the URL has been verified to return HTTP 200 — never guessed.
+  // Older stored rows may only have `link`; rendering falls back to it.
+  liveUrl?: string
   status?: string // e.g. 'Live', 'In build', 'In formation', 'Complete', 'In progress'
   // Source-code gating: when repoGated is true the repo is shown by name +
   // description only, with an "Unlock source access" flow. The actual repo
@@ -357,7 +362,7 @@ const DEFAULT_PROFILE: ProfileDetails = {
   githubUrl3: '',
   githubUrl4: '',
   profileImage: '/profile.jpg',
-  logoImage: '/logo-lockup.png'
+  logoImage: '/logo.png'
 }
 
 const DEFAULT_SERVICES: ServiceItem[] = [
@@ -408,6 +413,7 @@ const DEFAULT_PROJECTS: ProjectItem[] = [
     iconName: 'Video',
     mockup: 'showcase',
     link: 'https://giinmeet.nimdaukus.com',
+    liveUrl: 'https://giinmeet.nimdaukus.com',
     status: 'Live',
     repoName: 'GiinMeet',
     repoDescription: 'Next.js video-meeting platform — LiveKit rooms, Supabase backend, waiting room and passcodes, host controls, attendance and meeting templates.',
@@ -468,6 +474,7 @@ const DEFAULT_PROJECTS: ProjectItem[] = [
     iconName: 'Lightbulb',
     mockup: 'showcase',
     link: 'https://www.tiktok.com/@kitothesage',
+    liveUrl: 'https://www.tiktok.com/@kitothesage',
     status: 'Live',
     repoName: 'Kito',
     repoDescription: 'Production scripts, prompts and pipeline for the Kito daily explainers.',
@@ -483,6 +490,7 @@ const DEFAULT_PROJECTS: ProjectItem[] = [
     iconName: 'Clapperboard',
     mockup: 'showcase',
     link: 'https://www.tiktok.com/@ukusstudio',
+    liveUrl: 'https://www.tiktok.com/@ukusstudio',
     status: 'Live',
     repoName: 'UKUS Studio',
     repoDescription: 'Scripts, continuity bibles and production files for the UKUS short dramas.',
@@ -533,6 +541,253 @@ const DEFAULT_PROJECTS: ProjectItem[] = [
     repoDescription: 'Lesson decks, lab packs and Packet Tracer files for the S4-S6 networking course.',
     repoGated: true,
     repoPrice: '$49'
+  },
+  {
+    id: 'p10',
+    title: 'CareerDNA',
+    subtitle: 'Multi-agent career intelligence platform — 14 specialist AI agents model a candidate against a target role, with ATS parser simulations, a recruiter eye-scan simulation and evidence-backed analytics.',
+    category: 'dev',
+    tech: ['React 18', 'TypeScript', 'Vite', 'Tailwind', 'Supabase'],
+    iconName: 'Brain',
+    mockup: 'showcase',
+    link: 'https://career-dna-lilac.vercel.app',
+    liveUrl: 'https://career-dna-lilac.vercel.app',
+    status: 'Live',
+    repoName: 'CareerDNA',
+    repoDescription: 'Multi-agent career intelligence platform — 14 specialist AI agents, ATS parser simulations, recruiter eye-scan and evidence verification.',
+    repoGated: true,
+    repoPrice: '$99'
+  },
+  {
+    id: 'p11',
+    title: 'bugerhub',
+    subtitle: 'Online food-ordering platform — browse the menu, order and track delivery, with separate dashboards for customers, chefs, riders and admins.',
+    category: 'dev',
+    tech: ['React 19', 'Vite', 'Supabase', 'TypeScript'],
+    iconName: 'UtensilsCrossed',
+    mockup: 'showcase',
+    link: 'https://bugerhub.vercel.app',
+    liveUrl: 'https://bugerhub.vercel.app',
+    status: 'Live',
+    repoName: 'bugerhub',
+    repoDescription: 'Online food-ordering platform — menu, checkout and order tracking, with dashboards for customers, chefs, riders and admins.',
+    repoGated: true,
+    repoPrice: '$99'
+  },
+  {
+    id: 'p12',
+    title: 'Blessed Travel — Tour Agency',
+    subtitle: 'Travel and tour agency website — brochure and destination imagery, built with Next.js. Early build.',
+    category: 'dev',
+    tech: ['Next.js', 'TypeScript'],
+    iconName: 'Plane',
+    mockup: 'showcase',
+    link: '',
+    status: 'In build',
+    repoName: 'Blessed-Travel-Tour-Agency',
+    repoDescription: 'Travel and tour agency website (Next.js) — brochure and destination imagery.',
+    repoGated: true,
+    repoPrice: '$49'
+  },
+  {
+    id: 'p13',
+    title: 'GIIN Website',
+    subtitle: 'The Global Impact Innovators Ltd company website — Next.js frontend with a TypeScript backend, Prisma and Docker.',
+    category: 'dev',
+    tech: ['Next.js', 'TypeScript', 'Prisma', 'Docker'],
+    iconName: 'Globe',
+    mockup: 'showcase',
+    link: 'https://giin-website-frontend.vercel.app',
+    liveUrl: 'https://giin-website-frontend.vercel.app',
+    status: 'Live',
+    repoName: 'GIIN_website_Frontend',
+    repoDescription: 'The Global Impact Innovators Ltd company website — Next.js frontend, TypeScript backend, Prisma and Docker.',
+    repoGated: true,
+    repoPrice: '$99'
+  },
+  {
+    id: 'p14',
+    title: 'eLiberia',
+    subtitle: 'eLiberia platform — Next.js and TypeScript frontend and backend repos. Scaffold stage: READMEs and env examples only, no application code yet.',
+    category: 'venture',
+    tech: ['Next.js', 'TypeScript'],
+    iconName: 'Flag',
+    mockup: 'showcase',
+    link: '',
+    status: 'In formation',
+    repoName: 'eLiberia',
+    repoDescription: 'eLiberia platform — Next.js and TypeScript frontend and backend repos, scaffold stage (READMEs and env examples only).',
+    repoGated: true,
+    repoPrice: '$29'
+  },
+  {
+    id: 'p15',
+    title: 'Giin Loan Service',
+    subtitle: 'Loan service platform — clients apply online, approvals pass a multi-signature approval centre, then disbursements, invoices, receipts and portfolio tracking.',
+    category: 'dev',
+    tech: ['Next.js 14', 'Supabase', 'PostgreSQL', 'React 18'],
+    iconName: 'Landmark',
+    mockup: 'showcase',
+    link: '',
+    status: 'In build',
+    repoName: 'Giin_Loan_Service',
+    repoDescription: 'Loan service platform — online applications, multi-signature approval centre, disbursements, invoices, receipts and portfolio tracking.',
+    repoGated: true,
+    repoPrice: '$99'
+  },
+  {
+    id: 'p16',
+    title: 'GIINLIVE',
+    subtitle: 'Live Score and team creation. Details unverified — private repo, description as shown on the GitHub profile.',
+    category: 'dev',
+    tech: ['TypeScript'],
+    iconName: 'Trophy',
+    mockup: 'showcase',
+    link: '',
+    repoName: 'GIINLIVE',
+    repoDescription: 'Live Score and team creation. (Unverified — private repo; description as shown on the GitHub profile.)',
+    repoGated: true,
+    repoPrice: '$29'
+  },
+  {
+    id: 'p17',
+    title: 'Justcodewebsite',
+    subtitle: 'Details unverified — private repo, not readable from here; Suku to confirm what this project is.',
+    category: 'dev',
+    tech: [],
+    iconName: 'Globe',
+    mockup: 'showcase',
+    link: '',
+    repoName: 'Justcodewebsite',
+    repoDescription: 'Details unverified — private repo, not readable from here.',
+    repoGated: true,
+    repoPrice: '$29'
+  },
+  {
+    id: 'p18',
+    title: 'nimdA',
+    subtitle: 'Details unverified — private repo, not readable from here; Suku to confirm what this project is.',
+    category: 'dev',
+    tech: [],
+    iconName: 'FolderGit',
+    mockup: 'showcase',
+    link: '',
+    repoName: 'nimdA',
+    repoDescription: 'Details unverified — private repo, not readable from here.',
+    repoGated: true,
+    repoPrice: '$29'
+  },
+  {
+    id: 'p19',
+    title: 'SCCCS-NextGen',
+    subtitle: 'Details unverified — the 11suku GitHub account is flagged and its repos cannot be read; Suku to confirm what this project is.',
+    category: 'dev',
+    tech: [],
+    iconName: 'Cpu',
+    mockup: 'showcase',
+    link: '',
+    repoName: 'SCCCS-NextGen',
+    repoDescription: 'Details unverified — 11suku repo not readable (account flagged).',
+    repoGated: true,
+    repoPrice: '$29'
+  },
+  {
+    id: 'p20',
+    title: 'Smart Rehabilitation System',
+    subtitle: 'Details unverified — the 11suku GitHub account is flagged and its repos cannot be read; Suku to confirm what this project is.',
+    category: 'dev',
+    tech: [],
+    iconName: 'HeartPulse',
+    mockup: 'showcase',
+    link: '',
+    repoName: 'Smart_Rehabilitation_system',
+    repoDescription: 'Details unverified — 11suku repo not readable (account flagged).',
+    repoGated: true,
+    repoPrice: '$29'
+  },
+  {
+    id: 'p21',
+    title: 'Nimda-Ukus Smartschool',
+    subtitle: 'Details unverified — the 11suku GitHub account is flagged and its repos cannot be read; Suku to confirm what this project is.',
+    category: 'dev',
+    tech: [],
+    iconName: 'GraduationCap',
+    mockup: 'showcase',
+    link: '',
+    repoName: 'Nimda-Ukus_smartschool',
+    repoDescription: 'Details unverified — 11suku repo not readable (account flagged).',
+    repoGated: true,
+    repoPrice: '$29'
+  },
+  {
+    id: 'p22',
+    title: 'AI Agents for Beginners',
+    subtitle: 'Details unverified — the 11suku GitHub account is flagged and its repos cannot be read; Suku to confirm what this project is.',
+    category: 'dev',
+    tech: [],
+    iconName: 'Bot',
+    mockup: 'showcase',
+    link: '',
+    repoName: 'ai-agents-for-beginners',
+    repoDescription: 'Details unverified — 11suku repo not readable (account flagged).',
+    repoGated: true,
+    repoPrice: '$29'
+  },
+  {
+    id: 'p23',
+    title: 'Obi-Kaya',
+    subtitle: 'Details unverified — the 11suku GitHub account is flagged and its repos cannot be read; Suku to confirm what this project is.',
+    category: 'dev',
+    tech: [],
+    iconName: 'FolderGit',
+    mockup: 'showcase',
+    link: '',
+    repoName: 'Obi-Kaya',
+    repoDescription: 'Details unverified — 11suku repo not readable (account flagged).',
+    repoGated: true,
+    repoPrice: '$29'
+  },
+  {
+    id: 'p24',
+    title: 'Sheane-Hub-Websie',
+    subtitle: 'Details unverified — the 11suku GitHub account is flagged and its repos cannot be read; Suku to confirm what this project is.',
+    category: 'dev',
+    tech: [],
+    iconName: 'Globe',
+    mockup: 'showcase',
+    link: '',
+    repoName: 'Sheane-Hub-Websie',
+    repoDescription: 'Details unverified — 11suku repo not readable (account flagged).',
+    repoGated: true,
+    repoPrice: '$29'
+  },
+  {
+    id: 'p25',
+    title: 'Connectech Website',
+    subtitle: 'Details unverified — the 11suku GitHub account is flagged and its repos cannot be read; Suku to confirm what this project is.',
+    category: 'dev',
+    tech: [],
+    iconName: 'Globe',
+    mockup: 'showcase',
+    link: '',
+    repoName: 'Connectech-website',
+    repoDescription: 'Details unverified — 11suku repo not readable (account flagged).',
+    repoGated: true,
+    repoPrice: '$29'
+  },
+  {
+    id: 'p26',
+    title: 'Connectech',
+    subtitle: 'Details unverified — the 11suku GitHub account is flagged and its repos cannot be read; Suku to confirm what this project is.',
+    category: 'dev',
+    tech: [],
+    iconName: 'Network',
+    mockup: 'showcase',
+    link: '',
+    repoName: 'Connectech',
+    repoDescription: 'Details unverified — 11suku repo not readable (account flagged).',
+    repoGated: true,
+    repoPrice: '$29'
   }
 ]
 

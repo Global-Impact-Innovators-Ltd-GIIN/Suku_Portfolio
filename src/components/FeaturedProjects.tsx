@@ -36,8 +36,10 @@ export default function FeaturedProjects() {
   // metrics — the visual is the project's icon, status and real stack.
   const renderShowcase = (project: ProjectItem) => {
     const Icon = (LucideIcons as unknown as Record<string, React.ComponentType<{ className?: string; strokeWidth?: number }>>)[project.iconName] || LucideIcons.FolderGit
-    const domain = project.link
-      ? project.link.replace(/^https?:\/\//, '').replace(/\/$/, '')
+    // Live URL first; older stored rows may only have `link`.
+    const liveUrl = project.liveUrl || project.link
+    const domain = liveUrl
+      ? liveUrl.replace(/^https?:\/\//, '').replace(/\/$/, '')
       : ''
     const status = project.status || 'Featured'
     const isLive = status === 'Live' || status === 'Complete'
@@ -47,7 +49,7 @@ export default function FeaturedProjects() {
         <div className="absolute inset-0 bg-grid-texture bg-[size:28px_28px] opacity-70" />
         <div className="absolute -top-10 -right-10 w-48 h-48 rounded-full bg-gold-accent/10 blur-3xl" />
         <div className="absolute -bottom-16 -left-8 w-56 h-56 rounded-full bg-dark-navy/50 blur-3xl" />
-        <Icon className="absolute -right-4 -bottom-8 w-44 h-44 text-silver-text/[0.05]" strokeWidth={1} />
+        <Icon className="absolute -right-4 -bottom-8 w-44 h-44 text-silver-text/[0.05] transition-transform duration-500 group-hover:scale-110 group-hover:-rotate-3" strokeWidth={1} />
 
         {/* Top row: icon + category, status pill */}
         <div className="relative flex items-start justify-between gap-3">
@@ -121,7 +123,7 @@ export default function FeaturedProjects() {
               Featured Projects
             </h2>
             <p className="text-muted-gray max-w-xl text-sm leading-relaxed font-light">
-              Real work, shipped and in progress — platforms, ventures, teaching and stories from Kigali.
+              Real work, shipped and in progress — {projects.length} projects: platforms, ventures, teaching and stories from Kigali.
             </p>
           </div>
 
@@ -150,7 +152,9 @@ export default function FeaturedProjects() {
         >
           <AnimatePresence mode="popLayout">
             {filteredProjects.map((project) => {
-              const isGithub = project.link.includes('github.com')
+              // Live URL first; older stored rows may only have `link`.
+              const liveUrl = project.liveUrl || project.link
+              const isGithub = liveUrl.includes('github.com')
               return (
               <motion.div
                 layout
@@ -162,13 +166,35 @@ export default function FeaturedProjects() {
                 className={`group flex flex-col justify-between border border-dark-navy/40 shadow-navy-glow overflow-hidden hover:border-gold-accent/30 hover:shadow-gold-glow hover:-translate-y-1 transition-all duration-500 card-style ${visualMode}`}
               >
 
-                {/* Visual Showcase Container */}
-                <div className="w-full aspect-[16/10] bg-deep-obsidian border-b border-dark-navy/40 overflow-hidden relative">
-                  {renderShowcase(project)}
+                {/* Visual Showcase Container — clickable to the live site when one exists */}
+                {liveUrl ? (
+                  <a
+                    href={liveUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={`Visit the live site for ${project.title}`}
+                    className="block w-full aspect-[16/10] bg-deep-obsidian border-b border-dark-navy/40 overflow-hidden relative cursor-pointer"
+                  >
+                    {renderShowcase(project)}
 
-                  {/* Hover scan overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-obsidian/40 to-transparent pointer-events-none" />
-                </div>
+                    {/* Hover scan overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-obsidian/40 to-transparent pointer-events-none" />
+                    {/* Hover affordance: the whole demo box is a live link */}
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                      <span className="inline-flex items-center space-x-2 px-4 py-2 rounded-full bg-gold-accent text-[#111C33] text-xs font-extrabold uppercase tracking-wider shadow-gold-glow opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        <ExternalLink className="w-4 h-4" />
+                        <span>Visit live site</span>
+                      </span>
+                    </div>
+                  </a>
+                ) : (
+                  <div className="w-full aspect-[16/10] bg-deep-obsidian border-b border-dark-navy/40 overflow-hidden relative">
+                    {renderShowcase(project)}
+
+                    {/* Hover scan overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-obsidian/40 to-transparent pointer-events-none" />
+                  </div>
+                )}
 
                 {/* Info Text Area */}
                 <div className="p-6 text-left space-y-4">
@@ -240,9 +266,9 @@ export default function FeaturedProjects() {
 
                   {/* Actions Links */}
                   <div className="pt-4 border-t border-dark-navy/30 flex items-center justify-between gap-3">
-                    {project.link ? (
+                    {liveUrl ? (
                       <a
-                        href={project.link}
+                        href={liveUrl}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="inline-flex items-center space-x-1.5 text-xs font-bold uppercase tracking-wider text-muted-gray hover:text-silver-text transition-colors duration-300"

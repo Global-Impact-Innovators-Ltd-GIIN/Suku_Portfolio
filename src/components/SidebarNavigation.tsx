@@ -54,34 +54,34 @@ export default function SidebarNavigation({ activeSection, onNavClick }: Sidebar
     <div className="flex flex-col h-full justify-between overflow-y-auto">
       {/* Top Branding Section */}
       <div>
-        <div className="flex items-center space-x-3 mb-8">
+        {/* Brand block: standalone shield logo + name as separate text.
+            The whole block links home ("/") — a plain anchor so it loads /
+            refreshes the main page. The logo image holds the shield only;
+            the name is HTML text, never baked into the image. */}
+        <a href="/" aria-label="Mensah Q. Suku Jr — go to home page" className="flex items-center space-x-3 mb-8 cursor-pointer">
           {profile.logoImage ? (
-            /* Brand lockup (wide logo image — contains the name + title) */
             <img
               src={profile.logoImage}
-              alt="Mensah Q. Suku Jr — Founder & CEO"
-              className="h-12 w-auto max-w-full object-contain rounded-lg"
+              alt="Suku logo"
+              className="h-12 w-12 shrink-0 object-contain rounded-xl"
             />
           ) : (
-            <>
-              {/* Custom Logo Monogram / Image */}
-              <div className="relative flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-gold-accent to-dark-navy border border-gold-accent/40 shadow-gold-glow flex-shrink-0">
-                <span className="font-sans font-black text-xl text-white tracking-wider">
-                  {profile.initials || 'M'}
-                </span>
-                <div className="absolute -bottom-1 -right-1 w-3 h-3 rounded-full bg-gold-accent" />
-              </div>
-              <div>
-                <h2 className="text-silver-text font-bold text-base leading-tight tracking-wide truncate max-w-[170px]">
-                  {profile.name}
-                </h2>
-                <p className="text-gold-accent font-medium text-[10px] tracking-wider uppercase truncate max-w-[170px]">
-                  {profile.role}
-                </p>
-              </div>
-            </>
+            <div className="relative flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-gold-accent to-dark-navy border border-gold-accent/40 shadow-gold-glow flex-shrink-0">
+              <span className="font-sans font-black text-xl text-white tracking-wider">
+                {profile.initials || 'M'}
+              </span>
+              <div className="absolute -bottom-1 -right-1 w-3 h-3 rounded-full bg-gold-accent" />
+            </div>
           )}
-        </div>
+          <div>
+            <h2 className="text-silver-text font-bold text-base leading-tight tracking-wide truncate max-w-[170px]">
+              {profile.name}
+            </h2>
+            <p className="text-gold-accent font-medium text-[10px] tracking-wider uppercase truncate max-w-[170px]">
+              {profile.role}
+            </p>
+          </div>
+        </a>
 
         {/* Navigation Middle Links */}
         <nav className="space-y-1">
@@ -363,12 +363,13 @@ export default function SidebarNavigation({ activeSection, onNavClick }: Sidebar
         className={`lg:hidden w-full h-16 fixed top-0 left-0 border-b border-dark-navy flex items-center justify-between px-4 z-40 backdrop-blur-md card-style ${visualMode}`}
         style={{ borderRadius: '0px' }}
       >
-        <div className="flex items-center space-x-2">
+        {/* Brand block: standalone shield logo + name as separate text, links home */}
+        <a href="/" aria-label="Mensah Q. Suku Jr — go to home page" className="flex items-center space-x-2 cursor-pointer">
           {profile.logoImage ? (
             <img
               src={profile.logoImage}
-              alt="Mensah Q. Suku Jr — Founder & CEO"
-              className="h-8 w-auto max-w-[180px] object-contain rounded-md"
+              alt="Suku logo"
+              className="h-8 w-8 shrink-0 object-contain rounded-md"
             />
           ) : (
             <div className="relative flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br from-gold-accent to-dark-navy border border-gold-accent/40 shadow-gold-glow flex-shrink-0">
@@ -382,7 +383,7 @@ export default function SidebarNavigation({ activeSection, onNavClick }: Sidebar
               {profile.name}
             </h2>
           </div>
-        </div>
+        </a>
         
         {/* Mobile Header Buttons (Theme Toggle + Hamburger Menu) */}
         <div className="flex items-center space-x-1">
