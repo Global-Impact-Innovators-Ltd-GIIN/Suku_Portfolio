@@ -511,7 +511,6 @@ const DEFAULT_CERTS: CertItem[] = [
     details: '75.60/100, Second Class Upper. Degree conferred 31 October 2026. Specialisation in enterprise routing and switching, systems architecture and security.',
     date: 'Oct 2026',
     authority: 'UNILAK',
-    link: '/certs/Bachelor_Degree.pdf'
   },
   {
     id: 'c2',
