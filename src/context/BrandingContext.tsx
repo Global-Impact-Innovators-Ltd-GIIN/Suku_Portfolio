@@ -411,7 +411,8 @@ const DEFAULT_PROJECTS: ProjectItem[] = [
     status: 'Live',
     repoName: 'GiinMeet',
     repoDescription: 'Next.js video-meeting platform — LiveKit rooms, Supabase backend, waiting room and passcodes, host controls, attendance and meeting templates.',
-    repoGated: true
+    repoGated: true,
+    repoPrice: '$99'
   },
   {
     id: 'p2',
@@ -422,7 +423,11 @@ const DEFAULT_PROJECTS: ProjectItem[] = [
     iconName: 'ShoppingBag',
     mockup: 'showcase',
     link: '',
-    status: 'In build'
+    status: 'In build',
+    repoName: 'eWaterside',
+    repoDescription: 'NestJS and Prisma backend for the multi-vendor Liberia marketplace.',
+    repoGated: true,
+    repoPrice: '$99'
   },
   {
     id: 'p3',
@@ -433,7 +438,11 @@ const DEFAULT_PROJECTS: ProjectItem[] = [
     iconName: 'Building2',
     mockup: 'showcase',
     link: '',
-    status: 'In formation'
+    status: 'In formation',
+    repoName: 'Melloon',
+    repoDescription: 'Codebase for Melloon ventures and shared platform systems.',
+    repoGated: true,
+    repoPrice: '$49'
   },
   {
     id: 'p4',
@@ -444,7 +453,11 @@ const DEFAULT_PROJECTS: ProjectItem[] = [
     iconName: 'GraduationCap',
     mockup: 'showcase',
     link: '',
-    status: 'Complete'
+    status: 'Complete',
+    repoName: 'Windows Server Administration Course',
+    repoDescription: 'Course materials, lab scripts and configurations for the 46-lesson Windows Server course.',
+    repoGated: true,
+    repoPrice: '$49'
   },
   {
     id: 'p5',
@@ -455,7 +468,11 @@ const DEFAULT_PROJECTS: ProjectItem[] = [
     iconName: 'Lightbulb',
     mockup: 'showcase',
     link: 'https://www.tiktok.com/@kitothesage',
-    status: 'Live'
+    status: 'Live',
+    repoName: 'Kito',
+    repoDescription: 'Production scripts, prompts and pipeline for the Kito daily explainers.',
+    repoGated: true,
+    repoPrice: '$29'
   },
   {
     id: 'p6',
@@ -466,7 +483,11 @@ const DEFAULT_PROJECTS: ProjectItem[] = [
     iconName: 'Clapperboard',
     mockup: 'showcase',
     link: 'https://www.tiktok.com/@ukusstudio',
-    status: 'Live'
+    status: 'Live',
+    repoName: 'UKUS Studio',
+    repoDescription: 'Scripts, continuity bibles and production files for the UKUS short dramas.',
+    repoGated: true,
+    repoPrice: '$29'
   },
   {
     id: 'p7',
@@ -477,7 +498,11 @@ const DEFAULT_PROJECTS: ProjectItem[] = [
     iconName: 'BookOpen',
     mockup: 'showcase',
     link: '',
-    status: 'In progress'
+    status: 'In progress',
+    repoName: 'The Sovereign Mind',
+    repoDescription: 'Manuscript and publishing files for the book in progress.',
+    repoGated: true,
+    repoPrice: '$29'
   },
   {
     id: 'p8',
@@ -488,7 +513,11 @@ const DEFAULT_PROJECTS: ProjectItem[] = [
     iconName: 'Server',
     mockup: 'showcase',
     link: '',
-    status: 'Ongoing'
+    status: 'Ongoing',
+    repoName: 'VMware Enterprise Lab',
+    repoDescription: 'Lab configurations, VM definitions and network setup for the lab.local teaching lab.',
+    repoGated: true,
+    repoPrice: '$49'
   },
   {
     id: 'p9',
@@ -499,7 +528,11 @@ const DEFAULT_PROJECTS: ProjectItem[] = [
     iconName: 'Network',
     mockup: 'showcase',
     link: '',
-    status: 'Complete'
+    status: 'Complete',
+    repoName: 'Networking Lessons v2',
+    repoDescription: 'Lesson decks, lab packs and Packet Tracer files for the S4-S6 networking course.',
+    repoGated: true,
+    repoPrice: '$49'
   }
 ]
 
